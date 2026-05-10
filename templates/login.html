@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leumas Terminal | Login</title>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+</head>
+<body style="background: #f4f4f4; text-align: center; font-family: Arial;">
+
+    <h2>Leumas Institutional Terminal</h2>
+    <div style="background: white; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <p>Analyze market liquidity and structure.</p>
+        <button onclick="googleSignIn()" style="padding: 10px 20px; background: #4285F4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Sign in with Google
+        </button>
+    </div>
+
+    <script>
+        // Your Firebase Config (from screenshot 1000060890)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCB2_DvnFPBDAI3RsqTgpiUhnB1CaXj-14",
+            authDomain: "leumas-terminal.firebaseapp.com",
+            projectId: "leumas-terminal",
+            storageBucket: "leumas-terminal.firebasestorage.app",
+            messagingSenderId: "345308940671",
+            appId: "1:345308940671:web:37cff5b548334171acf24a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then((result) => {
+                result.user.getIdToken().then(idToken => {
+                    // Send token to our Python backend
+                    fetch('/login/firebase', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken: idToken })
+                    }).then(res => {
+                        if(res.ok) window.location.href = "/";
+                    });
+                });
+            }).catch(err => alert(err.message));
+        }
+    </script>
+</body>
+</html>
