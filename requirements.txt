@@ -2,6 +2,7 @@ flask
 flask_sqlalchemy
 flask_login
 gunicorn
-requests
-pandas
+firebase-admin
+python-dotenv
+
 
