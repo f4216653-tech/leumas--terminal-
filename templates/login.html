@@ -7,26 +7,31 @@
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
     <style>
-        /* Keeping your Institutional Design */
         body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .logo-header { position: absolute; top: 20px; left: 20px; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 5px; }
         .card { background: white; padding: 40px; border-radius: 8px; border: 1px solid #e1e1e1; width: 350px; text-align: center; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         .btn-main { width: 100%; padding: 12px; background: #2176d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .btn-social { width: 100%; padding: 10px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; color: #4285F4; font-weight: bold; margin-top: 10px; }
+        .divider { display: flex; align-items: center; text-align: center; color: #999; font-size: 11px; margin: 25px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #eee; }
+        .btn-social { width: 100%; padding: 10px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; color: #4285F4; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <div class="logo-header">LEUMAS TERMINAL</div>
+
     <div class="card">
         <h2>Sign up</h2>
-        <p>Institutional Intelligence Access</p>
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Institutional Intelligence Access</p>
         
-        <input type="email" id="emailField" placeholder="Email">
-        <input type="password" id="passField" placeholder="Password">
+        <input type="email" id="emailField" placeholder="Email" required>
+        <input type="password" id="passField" placeholder="Password" required>
+        
         <button class="btn-main" onclick="manualSignUp()">Sign up</button>
         
-        <div style="margin: 20px 0; color: #999; font-size: 11px;">OR ACCESS QUICKLY</div>
-        
+        <div class="divider">ACCESS QUICKLY</div>
+
         <button class="btn-social" onclick="googleSignIn()">Continue with Google</button>
     </div>
 
@@ -39,38 +44,35 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        // 1. FIXED GOOGLE LOGIN FOR MOBILE
+        // 1. Manual Sign Up Fix
+        function manualSignUp() {
+            const email = document.getElementById('emailField').value.trim();
+            const pass = document.getElementById('passField').value;
+            
+            if (!email || !email.includes('@')) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            firebase.auth().createUserWithEmailAndPassword(email, pass)
+                .then((userCredential) => userCredential.user.getIdToken())
+                .then(idToken => sendTokenToBackend(idToken))
+                .catch(err => alert("Error: " + err.message));
+        }
+
+        // 2. Google Redirect for Mobile
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            // Switched to Redirect so it works on your Tecno Spark
             firebase.auth().signInWithRedirect(provider);
         }
 
-        // Handle the result after the Google redirect
+        // Catch the result after redirect
         firebase.auth().getRedirectResult().then((result) => {
             if (result.user) {
-                result.user.getIdToken().then(idToken => {
-                    sendTokenToBackend(idToken);
-                });
+                result.user.getIdToken().then(idToken => sendTokenToBackend(idToken));
             }
-        }).catch(err => console.error(err));
+        });
 
-        // 2. WORKING MANUAL SIGN UP
-        function manualSignUp() {
-            const email = document.getElementById('emailField').value;
-            const pass = document.getElementById('passField').value;
-            
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
-                .then((userCredential) => {
-                    return userCredential.user.getIdToken();
-                })
-                .then(idToken => {
-                    sendTokenToBackend(idToken);
-                })
-                .catch(err => alert("Sign up failed: " + err.message));
-        }
-
-        // Shared function to log into your Flask Server
         function sendTokenToBackend(idToken) {
             fetch('/login/firebase', {
                 method: 'POST',
@@ -83,4 +85,5 @@
     </script>
 </body>
 </html>
+
 
