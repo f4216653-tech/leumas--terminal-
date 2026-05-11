@@ -1,8 +1,8 @@
-flask
-flask_sqlalchemy
-flask_login
-gunicorn
+Flask
+Flask-SQLAlchemy
+Flask-Login
 firebase-admin
-python-dotenv
+gunicorn
+
 
 
