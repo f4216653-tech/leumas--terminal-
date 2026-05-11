@@ -1,74 +1,41 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, current_user
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import firebase_admin
 from firebase_admin import credentials, auth
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'leumas_terminal_private_2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///terminal.db'
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
-
-db = SQLAlchemy(app)
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
-
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    is_premium = db.Column(db.Boolean, default=False)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# Initialize Firebase Admin with your uploaded key
+cred = credentials.Certificate("serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
 
 @app.route('/')
-@login_required
+def home():
+    # In a full version, check for session cookies here
+    return render_template('login.html')
+
+@app.route('/dashboard')
 def dashboard():
-    # ADMIN BYPASS: Fletcher/Sosu always skips the paywall
-    if current_user.email == "f4216653@gmail.com" or current_user.is_premium:
-        return render_template('dashboard.html')
-    return redirect(url_for('subscription'))
+    return render_template('dashboard.html')
 
 @app.route('/login/firebase', methods=['POST'])
 def firebase_login():
     data = request.get_json()
-    token = data.get('idToken')
+    id_token = data.get('idToken')
+    
     try:
-        decoded_token = auth.verify_id_token(token)
-        email = decoded_token['email']
-        user = User.query.filter_by(email=email).first()
+        # Verifies the token sent from the browser
+        decoded_token = auth.verify_id_token(id_token)
+        email = decoded_token.get('email')
         
-        # Auto-premium for your admin email
-        is_admin = (email == "f4216653@gmail.com")
-        
-        if not user:
-            user = User(email=email, is_premium=is_admin)
-            db.session.add(user)
-            db.session.commit()
-        elif is_admin:
-            user.is_premium = True
-            db.session.commit()
-            
-        login_user(user)
-        return jsonify({"success": True}), 200
+        # Success: Redirect logic happens in the frontend
+        return jsonify({"status": "success", "email": email}), 200
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
-
-@app.route('/login')
-def login(): return render_template('login.html')
-
-@app.route('/subscription')
-@login_required
-def subscription(): return render_template('subscription.html')
+        return jsonify({"status": "error", "message": str(e)}), 401
 
 if __name__ == '__main__':
-    with app.app_context(): db.create_all()
     app.run(debug=True)
+
 
 
         
