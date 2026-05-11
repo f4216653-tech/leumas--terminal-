@@ -1,44 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leumas Terminal | Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leumas Institutional | Precision Terminal</title>
+    <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #ffffff; }
-        .header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .chart-container { height: 80vh; padding: 20px; }
-        .mamba-status { color: #6a0dad; font-weight: bold; font-size: 0.8em; } /* A nod to the Mamba Mentality */
+        :root { --bg: #050505; --panel: #111; --border: #222; --gold: #d4af37; --blue: #0070f3; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; height: 100vh; }
+        
+        /* Left Intel Feed */
+        .intel-feed { width: 300px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
+        .feed-header { padding: 20px; font-weight: bold; letter-spacing: 2px; color: var(--gold); border-bottom: 1px solid var(--border); }
+        .intel-card { padding: 15px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .bias-bull { color: #00ff88; font-weight: bold; }
+        
+        /* Execution Area */
+        .execution-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .stats-bar { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 30px; font-size: 12px; }
+        
+        /* Paywall Overlay */
+        .premium-overlay { 
+            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); 
+            background: rgba(5,5,5,0.85); z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        .paywall-box { background: #000; padding: 40px; border: 1px solid var(--gold); border-radius: 4px; max-width: 400px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div>
-            <h2 style="margin:0;">Institutional Dashboard</h2>
-            <span class="mamba-status">FOCUS • DISCIPLINE • EXECUTION</span>
+    <div class="intel-feed">
+        <div class="feed-header">INSTITUTIONAL INTEL</div>
+        <div class="intel-card">
+            <span class="bias-bull">BIAS: BULLISH</span><br>
+            <small>Asset: XAUUSD</small><br><br>
+            <p>London session sweep of Asian Lows complete. Looking for internal CHoCH.</p>
+            <div style="color:var(--gold); font-size: 10px;">ZONE: 2024.50 (Liquidity)</div>
         </div>
-        <a href="/logout" style="text-decoration:none; color: #ff4444;">Logout</a>
+        <div class="intel-card" style="margin-top: auto; background: #000;">
+            <small style="color: #666;">FED WATCH: Rates maintained. DXY weakness expected.</small>
+        </div>
     </div>
 
-    <div class="chart-container">
-        <div id="tradingview_widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget({
-          "autosize": true,
-          "symbol": "OANDA:XAUUSD",
-          "interval": "H1",
-          "timezone": "Etc/UTC",
-          "theme": "light",
-          "style": "1",
-          "locale": "en",
-          "toolbar_bg": "#f1f3f6",
-          "enable_publishing": false,
-          "hide_side_toolbar": false,
-          "allow_symbol_change": true,
-          "container_id": "tradingview_widget"
-        });
-        </script>
+    <div class="execution-area">
+        <div class="stats-bar">
+            <div>SYMBOL: <b>XAUUSD</b></div>
+            <div>SESSION: <b>NEW YORK OPEN</b></div>
+            <div style="margin-left: auto; color: var(--gold);">PREMIUM STATUS: <span id="status">LOCKED</span></div>
         </div>
 
+        <div class="premium-overlay" id="paywall">
+            <div class="paywall-box">
+                <h3 style="color: var(--gold); margin-top: 0;">Unlock Entry + Stop Loss + Targets</h3>
+                <p style="font-size: 14px; color: #ccc;">You see the direction... but you don't know how to enter. Join the elite institutional flow.</p>
+                <a href="https://leumas.lemonsqueezy.com/checkout/buy/your-link-id" class="lemonsqueezy-button" style="display:inline-block; padding:12px 25px; background:var(--gold); color:black; text-decoration:none; font-weight:bold; border-radius:4px;">UPGRADE FOR $49/MO</a>
+            </div>
+        </div>
+
+        <div id="tradingview_chart" style="flex:1;"></div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "OANDA:XAUUSD",
+            "interval": "15",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "container_id": "tradingview_chart",
+            "hide_side_toolbar": false, // Keep tools for them to see levels
+            "allow_symbol_change": true,
+            "details": true,
+            "hotlist": true,
+            "calendar": true
+        });
+
+        // Function to unlock for you (Admin)
+        function unlockTerminal() {
+            document.getElementById('paywall').style.display = 'none';
+            document.getElementById('status').innerText = 'ACTIVE';
+        }
+        
+        // If logged in as f4216653@gmail.com, auto-unlock
+        // (This logic will be handled by your Flask session later)
+    </script>
 </body>
 </html>
+
