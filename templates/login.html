@@ -3,27 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Terminal | Institutional Access</title>
+    <title>Leumas Terminal | Access</title>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-card { width: 320px; padding: 30px; border: 1px solid #eee; text-align: center; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; cursor: pointer; font-weight: bold; }
-        .btn-blue { background: #1a73e8; color: white; border: none; }
-        .btn-white { background: white; border: 1px solid #ddd; margin-top: 10px; }
+        body { font-family: sans-serif; background: #050505; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { width: 320px; padding: 40px; border: 1px solid #222; text-align: center; background: #0a0a0a; }
+        .btn-google { width: 100%; padding: 12px; background: #fff; color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 2px; }
     </style>
 </head>
 <body>
-    <div class="auth-card">
-        <h2 id="title">Sign in</h2>
-        <input type="email" id="emailField" placeholder="Email">
-        <input type="password" id="passField" placeholder="Password">
-        <button class="btn btn-blue" id="submitBtn" onclick="handleAuth()">Sign in</button>
-        <div style="margin: 15px 0; font-size: 10px; color: #aaa;">ACCESS QUICKLY</div>
-        <button class="btn btn-white" onclick="googleSignIn()">Continue with Google</button>
-        <p id="toggle" style="font-size: 12px; color: #555; cursor: pointer; margin-top: 20px;" onclick="toggle()">Need an account? Sign up</p>
+    <div class="card">
+        <h2 style="color: #d4af37; letter-spacing: 2px;">LEUMAS TERMINAL</h2>
+        <p style="font-size: 11px; color: #666; margin-bottom: 30px;">Institutional Order Flow Intelligence</p>
+        <button class="btn-google" onclick="googleSignIn()">CONTINUE WITH GOOGLE</button>
     </div>
 
     <script>
@@ -35,33 +28,11 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        let isLogin = true;
-
-        function toggle() {
-            isLogin = !isLogin;
-            document.getElementById('title').innerText = isLogin ? "Sign in" : "Sign up";
-            document.getElementById('submitBtn').innerText = isLogin ? "Sign in" : "Sign up";
-            document.getElementById('toggle').innerText = isLogin ? "Need an account? Sign up" : "Have an account? Sign in";
-        }
-
-        function handleAuth() {
-            const email = document.getElementById('emailField').value;
-            const pass = document.getElementById('passField').value;
-            const action = isLogin ? 
-                firebase.auth().signInWithEmailAndPassword(email, pass) : 
-                firebase.auth().createUserWithEmailAndPassword(email, pass);
-            
-            action.then(res => res.user.getIdToken())
-                  .then(token => sendToken(token))
-                  .catch(err => alert(err.message));
-        }
-
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithRedirect(provider); // Fix for mobile
+            firebase.auth().signInWithRedirect(provider);
         }
 
-        // Catch the Google redirect result
         firebase.auth().getRedirectResult().then(result => {
             if (result.user) {
                 result.user.getIdToken().then(token => sendToken(token));
@@ -73,14 +44,17 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken: idToken })
-            }).then(res => {
-                if (res.ok) window.location.href = "/dashboard";
-                else alert("Unauthorized access.");
+            }).then(res => res.json()).then(data => {
+                if (data.status === "success") {
+                    localStorage.setItem("isPremium", data.is_premium);
+                    window.location.href = "/dashboard";
+                }
             });
         }
     </script>
 </body>
 </html>
+
 
 
 
