@@ -5,7 +5,7 @@ from firebase_admin import credentials, auth
 
 app = Flask(__name__)
 
-# Initialize Firebase - Ensure serviceAccountKey.json is in your root folder
+# Load your specific service account key
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
@@ -26,10 +26,8 @@ def firebase_login():
         decoded_token = auth.verify_id_token(id_token)
         email = decoded_token.get('email')
         
-        # Admin recognition logic
-        is_premium = False
-        if email == "f4216653@gmail.com":
-            is_premium = True
+        # Admin Recognition
+        is_premium = (email == "f4216653@gmail.com")
             
         return jsonify({
             "status": "success", 
@@ -41,6 +39,7 @@ def firebase_login():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
