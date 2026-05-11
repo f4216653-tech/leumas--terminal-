@@ -3,91 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Institutional | Precision Terminal</title>
-    <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+    <title>Leumas Institutional | Precision Feed</title>
+    <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
     <style>
-        :root { --bg: #050505; --panel: #111; --border: #222; --gold: #d4af37; --blue: #0070f3; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; height: 100vh; }
+        :root { --bg: #050505; --panel: #0f0f0f; --border: #1a1a1a; --gold: #d4af37; --red: #ff4d4d; --green: #00ff88; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Left Intel Feed */
-        .intel-feed { width: 300px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
-        .feed-header { padding: 20px; font-weight: bold; letter-spacing: 2px; color: var(--gold); border-bottom: 1px solid var(--border); }
-        .intel-card { padding: 15px; border-bottom: 1px solid var(--border); font-size: 13px; }
-        .bias-bull { color: #00ff88; font-weight: bold; }
+        .sidebar { width: 320px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
+        .feed-header { padding: 20px; font-weight: 800; color: var(--gold); border-bottom: 1px solid var(--border); font-size: 13px; letter-spacing: 1px; }
+        .intel-card { padding: 20px; border-bottom: 1px solid var(--border); }
+        .label { font-size: 9px; color: #555; text-transform: uppercase; margin-bottom: 5px; }
         
-        /* Execution Area */
-        .execution-area { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .stats-bar { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 30px; font-size: 12px; }
+        .main { flex: 1; position: relative; display: flex; flex-direction: column; }
+        .paywall { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); }
+        .paywall-box { background: #000; padding: 40px; border: 1px solid var(--gold); text-align: center; max-width: 380px; }
         
-        /* Paywall Overlay */
-        .premium-overlay { 
-            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); 
-            background: rgba(5,5,5,0.85); z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center;
-            backdrop-filter: blur(5px);
-        }
-        .paywall-box { background: #000; padding: 40px; border: 1px solid var(--gold); border-radius: 4px; max-width: 400px; }
+        .ls-button { display: block; padding: 15px; background: var(--gold); color: black; text-decoration: none; font-weight: bold; border-radius: 2px; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="intel-feed">
+    <div class="sidebar">
         <div class="feed-header">INSTITUTIONAL INTEL</div>
+        
         <div class="intel-card">
-            <span class="bias-bull">BIAS: BULLISH</span><br>
-            <small>Asset: XAUUSD</small><br><br>
-            <p>London session sweep of Asian Lows complete. Looking for internal CHoCH.</p>
-            <div style="color:var(--gold); font-size: 10px;">ZONE: 2024.50 (Liquidity)</div>
+            <div class="label">Directional Bias</div>
+            <div style="color: var(--green); font-weight: bold;">BULLISH ABOVE 2310.00</div>
+            <div style="color: var(--red); font-weight: bold;">BEARISH BELOW 2302.50</div>
+            <div style="font-size: 10px; color: var(--gold); margin-top: 10px;">VALID FOR NY SESSION ONLY</div>
         </div>
-        <div class="intel-card" style="margin-top: auto; background: #000;">
-            <small style="color: #666;">FED WATCH: Rates maintained. DXY weakness expected.</small>
+
+        <div class="intel-card">
+            <div class="label">Liquidity Pool</div>
+            <div style="color: var(--gold);">2310.00 — 2315.00</div>
+            <p style="font-size: 12px; margin-top: 5px; color: #ccc;">NY Open sweep expected. High probability continuation if 15m structure shifts.</p>
+        </div>
+
+        <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
+            <div class="label">Last Trade Performance</div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>XAUUSD (Friday)</span>
+                <span style="color: var(--green);">+2.1 RR HIT</span>
+            </div>
+            <div style="font-size: 9px; color: #444; margin-top: 5px;">NEXT UPDATE: IN 24H</div>
         </div>
     </div>
 
-    <div class="execution-area">
-        <div class="stats-bar">
-            <div>SYMBOL: <b>XAUUSD</b></div>
-            <div>SESSION: <b>NEW YORK OPEN</b></div>
-            <div style="margin-left: auto; color: var(--gold);">PREMIUM STATUS: <span id="status">LOCKED</span></div>
-        </div>
-
-        <div class="premium-overlay" id="paywall">
+    <div class="main">
+        <div id="premium-paywall" class="paywall">
             <div class="paywall-box">
-                <h3 style="color: var(--gold); margin-top: 0;">Unlock Entry + Stop Loss + Targets</h3>
-                <p style="font-size: 14px; color: #ccc;">You see the direction... but you don't know how to enter. Join the elite institutional flow.</p>
-                <a href="https://leumas.lemonsqueezy.com/checkout/buy/your-link-id" class="lemonsqueezy-button" style="display:inline-block; padding:12px 25px; background:var(--gold); color:black; text-decoration:none; font-weight:bold; border-radius:4px;">UPGRADE FOR $49/MO</a>
+                <h2 style="font-size: 20px; margin: 0;">You see the direction...</h2>
+                <p style="font-size: 14px; color: #888; margin: 15px 0;">But you don't have the entry. Stop guessing and trade the exact institutional levels.</p>
+                <div style="font-size: 24px; color: var(--gold); margin-bottom: 20px; font-weight: bold;">$10 / MONTH</div>
+                
+                <a href="https://leumas-institutional.lemonsqueezy.com/checkout/buy/eb356f78-8db1-45b9-8aed-6b857cdebef0?embed=1" class="lemonsqueezy-button ls-button">
+                    UNLOCK EXACT ENTRY + SL + TARGETS
+                </a>
             </div>
         </div>
-
-        <div id="tradingview_chart" style="flex:1;"></div>
+        <div id="tradingview_chart" style="flex: 1;"></div>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
+        // Admin & Premium Logic
+        window.onload = function() {
+            const isPremium = localStorage.getItem("isPremium") === "true";
+            if (isPremium) {
+                document.getElementById('premium-paywall').style.display = 'none';
+            }
+        };
+
+        // Chart Initialization
         new TradingView.widget({
             "autosize": true,
             "symbol": "OANDA:XAUUSD",
             "interval": "15",
-            "timezone": "Etc/UTC",
             "theme": "dark",
             "style": "1",
-            "locale": "en",
             "container_id": "tradingview_chart",
-            "hide_side_toolbar": false, // Keep tools for them to see levels
-            "allow_symbol_change": true,
-            "details": true,
-            "hotlist": true,
-            "calendar": true
+            "hide_top_toolbar": true,
+            "hide_legend": true,
+            "save_image": false
         });
-
-        // Function to unlock for you (Admin)
-        function unlockTerminal() {
-            document.getElementById('paywall').style.display = 'none';
-            document.getElementById('status').innerText = 'ACTIVE';
-        }
-        
-        // If logged in as f4216653@gmail.com, auto-unlock
-        // (This logic will be handled by your Flask session later)
     </script>
 </body>
 </html>
+
 
