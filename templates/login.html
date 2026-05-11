@@ -1,72 +1,75 @@
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCB2_DvnFPBDAI3RsqTgpiUhnB1CaXj-14",
-        authDomain: "leumas-terminal.firebaseapp.com",
-        projectId: "leumas-terminal",
-        appId: "1:345308940671:web:37cff5b548334171acf24a"
-    };
-    firebase.initializeApp(firebaseConfig);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leumas Terminal | Access</title>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 8px; border: 1px solid #e1e1e1; width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 12px; background: #2176d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-social { width: 100%; padding: 10px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; color: #4285F4; font-weight: bold; margin-top: 10px; }
+        .toggle-link { margin-top: 20px; font-size: 14px; color: #666; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="authTitle">Sign up</h2>
+        <input type="email" id="emailField" placeholder="Email">
+        <input type="password" id="passField" placeholder="Password">
+        <button class="btn-main" id="submitBtn" onclick="handleAuth()">Sign up</button>
+        <div style="margin: 20px 0; color: #999; font-size: 11px;">ACCESS QUICKLY</div>
+        <button class="btn-social" onclick="googleSignIn()">Continue with Google</button>
+        <div class="toggle-link" id="toggleLink" onclick="toggleMode()">Already have an account? Sign in</div>
+    </div>
 
-    let isSignUpMode = true; // Controls if we are Signing Up or Signing In
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCB2_DvnFPBDAI3RsqTgpiUhnB1CaXj-14",
+            authDomain: "leumas-terminal.firebaseapp.com",
+            projectId: "leumas-terminal",
+            appId: "1:345308940671:web:37cff5b548334171acf24a"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-    // 1. TOGGLE LOGIC (Fixes the "Email in use" loop)
-    function toggleMode() {
-        isSignUpMode = !isSignUpMode;
-        document.getElementById('authTitle').innerText = isSignUpMode ? "Sign up" : "Sign in";
-        document.getElementById('submitBtn').innerText = isSignUpMode ? "Sign up" : "Sign in";
-        document.getElementById('toggleLink').innerText = isSignUpMode ? "Sign in" : "Sign up";
-    }
-
-    // 2. MANUAL EMAIL/PASSWORD LOGIC
-    function handleAuth() {
-        const email = document.getElementById('emailField').value.trim();
-        const pass = document.getElementById('passField').value;
-
-        if (!email || !pass) {
-            alert("Please enter both email and password.");
-            return;
+        let isSignUp = true;
+        function toggleMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('authTitle').innerText = isSignUp ? "Sign up" : "Sign in";
+            document.getElementById('submitBtn').innerText = isSignUp ? "Sign up" : "Sign in";
+            document.getElementById('toggleLink').innerText = isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up";
         }
 
-        if (isSignUpMode) {
-            // Tries to create a new account
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
-                .then(userCredential => userCredential.user.getIdToken())
-                .then(idToken => sendTokenToBackend(idToken))
-                .catch(err => alert("Sign up failed: " + err.message));
-        } else {
-            // Tries to log into existing account
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-                .then(userCredential => userCredential.user.getIdToken())
-                .then(idToken => sendTokenToBackend(idToken))
-                .catch(err => alert("Sign in failed: " + err.message));
+        function handleAuth() {
+            const email = document.getElementById('emailField').value;
+            const pass = document.getElementById('passField').value;
+            const action = isSignUp ? firebase.auth().createUserWithEmailAndPassword(email, pass) : firebase.auth().signInWithEmailAndPassword(email, pass);
+            action.then(userCredential => userCredential.user.getIdToken()).then(token => sendToken(token)).catch(err => alert(err.message));
         }
-    }
 
-    // 3. GOOGLE REDIRECT (Fixes mobile "No response")
-    function googleSignIn() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
-    }
-
-    // Handles the return from Google
-    firebase.auth().getRedirectResult().then((result) => {
-        if (result.user) {
-            result.user.getIdToken().then(idToken => sendTokenToBackend(idToken));
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithRedirect(provider);
         }
-    }).catch(err => alert("Google Error: " + err.message));
 
-    // 4. BACKEND COMMUNICATION
-    function sendTokenToBackend(idToken) {
-        fetch('/login/firebase', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken: idToken })
-        }).then(res => {
-            if(res.ok) window.location.href = "/";
-            else alert("Backend error. Check Flask logs.");
+        firebase.auth().getRedirectResult().then(result => {
+            if (result.user) result.user.getIdToken().then(token => sendToken(token));
         });
-    }
-                      </script>
+
+        function sendToken(idToken) {
+            fetch('/login/firebase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: idToken })
+            }).then(res => { if(res.ok) window.location.href = "/"; });
+        }
+    </script>
+</body>
+</html>
+
 
 
 
