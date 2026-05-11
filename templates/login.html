@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Terminal | Access</title>
+    <title>Leumas Terminal | Institutional Access</title>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 8px; border: 1px solid #e1e1e1; width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 12px; background: #2176d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .btn-social { width: 100%; padding: 10px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; color: #4285F4; font-weight: bold; margin-top: 10px; }
-        .toggle-link { margin-top: 20px; font-size: 14px; color: #666; cursor: pointer; }
+        body { font-family: sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { width: 320px; padding: 30px; border: 1px solid #eee; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; cursor: pointer; font-weight: bold; }
+        .btn-blue { background: #1a73e8; color: white; border: none; }
+        .btn-white { background: white; border: 1px solid #ddd; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 id="authTitle">Sign up</h2>
+    <div class="auth-card">
+        <h2 id="title">Sign in</h2>
         <input type="email" id="emailField" placeholder="Email">
         <input type="password" id="passField" placeholder="Password">
-        <button class="btn-main" id="submitBtn" onclick="handleAuth()">Sign up</button>
-        <div style="margin: 20px 0; color: #999; font-size: 11px;">ACCESS QUICKLY</div>
-        <button class="btn-social" onclick="googleSignIn()">Continue with Google</button>
-        <div class="toggle-link" id="toggleLink" onclick="toggleMode()">Already have an account? Sign in</div>
+        <button class="btn btn-blue" id="submitBtn" onclick="handleAuth()">Sign in</button>
+        <div style="margin: 15px 0; font-size: 10px; color: #aaa;">ACCESS QUICKLY</div>
+        <button class="btn btn-white" onclick="googleSignIn()">Continue with Google</button>
+        <p id="toggle" style="font-size: 12px; color: #555; cursor: pointer; margin-top: 20px;" onclick="toggle()">Need an account? Sign up</p>
     </div>
 
     <script>
@@ -35,28 +35,37 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        let isSignUp = true;
-        function toggleMode() {
-            isSignUp = !isSignUp;
-            document.getElementById('authTitle').innerText = isSignUp ? "Sign up" : "Sign in";
-            document.getElementById('submitBtn').innerText = isSignUp ? "Sign up" : "Sign in";
-            document.getElementById('toggleLink').innerText = isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up";
+        let isLogin = true;
+
+        function toggle() {
+            isLogin = !isLogin;
+            document.getElementById('title').innerText = isLogin ? "Sign in" : "Sign up";
+            document.getElementById('submitBtn').innerText = isLogin ? "Sign in" : "Sign up";
+            document.getElementById('toggle').innerText = isLogin ? "Need an account? Sign up" : "Have an account? Sign in";
         }
 
         function handleAuth() {
             const email = document.getElementById('emailField').value;
             const pass = document.getElementById('passField').value;
-            const action = isSignUp ? firebase.auth().createUserWithEmailAndPassword(email, pass) : firebase.auth().signInWithEmailAndPassword(email, pass);
-            action.then(userCredential => userCredential.user.getIdToken()).then(token => sendToken(token)).catch(err => alert(err.message));
+            const action = isLogin ? 
+                firebase.auth().signInWithEmailAndPassword(email, pass) : 
+                firebase.auth().createUserWithEmailAndPassword(email, pass);
+            
+            action.then(res => res.user.getIdToken())
+                  .then(token => sendToken(token))
+                  .catch(err => alert(err.message));
         }
 
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithRedirect(provider);
+            firebase.auth().signInWithRedirect(provider); // Fix for mobile
         }
 
+        // Catch the Google redirect result
         firebase.auth().getRedirectResult().then(result => {
-            if (result.user) result.user.getIdToken().then(token => sendToken(token));
+            if (result.user) {
+                result.user.getIdToken().then(token => sendToken(token));
+            }
         });
 
         function sendToken(idToken) {
@@ -64,7 +73,10 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken: idToken })
-            }).then(res => { if(res.ok) window.location.href = "/"; });
+            }).then(res => {
+                if (res.ok) window.location.href = "/dashboard";
+                else alert("Unauthorized access.");
+            });
         }
     </script>
 </body>
