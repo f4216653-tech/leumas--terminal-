@@ -3,76 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Terminal | Institutional Flow</title>
+    <title>Leumas Terminal | Decision Engine</title>
     <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
     <style>
-        :root { --bg: #050505; --panel: #0a0a0a; --border: #1a1a1a; --gold: #d4af37; --green: #00ff88; --red: #ff4d4d; }
+        :root { --bg: #050505; --panel: #0a0a0a; --border: #1a1a1a; --gold: #d4af37; --green: #00ff88; --red: #ff4d4d; --gray: #555; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
+        /* TOP BAR */
         .top-bar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--panel); font-size: 11px; font-weight: bold; }
-        .status-tag { color: var(--gold); padding: 4px 8px; border: 1px solid var(--gold); border-radius: 2px; }
-
+        
         .content-body { display: flex; flex: 1; overflow: hidden; }
 
-        /* LEFT: WATCHLIST (FRONT) */
+        /* LEFT: WATCHLIST & NEWS */
         .sidebar-left { width: 280px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
-        .watchlist-item { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .asset-name { font-weight: 800; font-size: 12px; }
-        .asset-price { font-size: 11px; font-family: monospace; color: #888; }
+        .watchlist-item { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; }
+        .news-box { flex: 1; overflow-y: auto; padding: 15px; font-size: 11px; border-top: 1px solid var(--border); }
+        .news-item { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #111; line-height: 1.4; }
 
         /* CENTER: CHART */
-        .chart-container { flex: 1; background: #000; border-right: 1px solid var(--border); position: relative; }
+        .chart-container { flex: 1; background: #000; border-right: 1px solid var(--border); }
 
-        /* RIGHT: PREMIUM */
-        .sidebar-right { width: 300px; padding: 25px; background: var(--panel); position: relative; }
-        .blurred { filter: blur(12px); opacity: 0.15; pointer-events: none; transition: 0.3s; }
+        /* RIGHT: DECISION ENGINE */
+        .sidebar-right { width: 340px; padding: 20px; background: var(--panel); position: relative; overflow-y: auto; }
+        .section-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; border-left: 2px solid var(--gold); padding-left: 8px; }
         
-        .paywall-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(0,0,0,0.7); padding: 25px; box-sizing: border-box; z-index: 10; }
-        .btn-upgrade { display: block; width: 100%; padding: 16px; background: var(--gold); color: #000; text-decoration: none; font-weight: 800; border-radius: 2px; margin-top: 20px; font-size: 12px; text-transform: uppercase; }
+        /* HIERARCHY: ENTRY DOMINANCE */
+        .entry-box { background: #0c0c0c; padding: 22px; border: 1px solid #222; margin-bottom: 20px; text-align: center; }
+        .entry-price { font-size: 28px; font-weight: 900; color: var(--gold); display: block; margin-top: 5px; }
 
-        .label { font-size: 9px; color: #444; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-        .value { font-size: 13px; font-weight: 700; margin-bottom: 20px; }
+        .status-pill { padding: 4px 10px; border-radius: 2px; font-size: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px; }
+        .waiting { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid var(--gold); }
+
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; }
+        .data-val { font-weight: 700; }
+
+        /* PAYWALL OVERLAY */
+        .paywall-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100; padding: 30px; box-sizing: border-box; }
+        .btn-upgrade { width: 100%; padding: 18px; background: var(--gold); color: #000; text-decoration: none; font-weight: 900; border-radius: 2px; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <div>TERMINAL: <span style="color:var(--gold)">LEUMAS INSTITUTIONAL</span></div>
-        <div>SESSION: <span style="color:var(--green)">LONDON / NY</span></div>
-        <div class="status-tag">PRECISION MODE</div>
+        <div id="precision-toggle" style="cursor:pointer; color:var(--green)">PRECISION MODE: ON</div>
     </div>
 
     <div class="content-body">
         <div class="sidebar-left">
-            <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 9px; color: #555; letter-spacing: 2px;">WATCHLIST</div>
-            <div class="watchlist-item"><span class="asset-name">XAUUSD</span><span class="asset-price" style="color:var(--green)">2314.50</span></div>
-            <div class="watchlist-item"><span class="asset-name">BTCUSD</span><span class="asset-price" style="color:var(--red)">64,120</span></div>
-            <div class="watchlist-item"><span class="asset-name">DXY</span><span class="asset-price">104.22</span></div>
-
-            <div style="padding: 20px; margin-top: auto; border-top: 1px solid var(--border);">
-                <div class="label">Directional Bias</div>
-                <div class="value" style="color:var(--green)">BULLISH > 2310.00</div>
-                <div class="label">Institutional Logic</div>
-                <p style="font-size: 11px; color: #666; line-height: 1.6;">Asian range sweep confirmed. Institutional displacement on 15m. Waiting for FVG re-entry.</p>
+            <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 9px; color: var(--gray);">WATCHLIST</div>
+            <div class="watchlist-item"><span>XAUUSD</span><span style="color:var(--green)">2314.50</span></div>
+            <div class="watchlist-item"><span>BTCUSD</span><span style="color:var(--red)">64,120</span></div>
+            
+            <div class="news-box">
+                <span class="section-label" style="border:none; padding:0; margin-bottom:15px;">Market Intelligence Feed</span>
+                <div id="news-feed">Loading high-impact news...</div>
             </div>
         </div>
 
         <div class="chart-container" id="tv_chart"></div>
 
         <div class="sidebar-right">
-            <div id="execution-panel" class="blurred">
-                <div class="label">Execution Entry</div>
-                <div class="value">2311.80 — 2312.50</div>
-                <div class="label">Risk Parameter (SL)</div>
-                <div class="value" style="color:var(--red)">2308.10</div>
-                <div class="label">Take Profit Targets</div>
-                <div class="value" style="color:var(--green)">2318.00 / 2325.00</div>
+            <div id="premium-content">
+                <span class="section-label">Trade Status</span>
+                <div class="status-pill waiting">🟡 WAITING FOR CONFIRMATION</div>
+
+                <div class="entry-box">
+                    <span class="section-label" style="border:none; padding:0;">Institutional Entry</span>
+                    <span class="entry-price">2311.80 – 2312.50</span>
+                </div>
+
+                <span class="section-label">Execution Logic</span>
+                <div class="data-row"><span>Confirmation:</span><span class="data-val">5M CHOCH + Pullback</span></div>
+                <div class="data-row"><span>Invalidation:</span><span class="data-val" style="color:var(--red)">Break below 2308.10</span></div>
+
+                <span class="section-label">Risk Management</span>
+                <div class="data-row"><span>Stop Loss:</span><span class="data-val" style="color:var(--red)">2308.10</span></div>
+                <div class="data-row"><span>Take Profit:</span><span class="data-val" style="color:var(--green)">2318.00 | 2325.00</span></div>
+                <div class="data-row"><span>Risk/Reward:</span><span class="data-val" style="color:var(--gold)">1 : 2.5 RR</span></div>
+
+                <div style="margin-top:25px; padding:15px; background:#111; border-left:2px solid var(--green);">
+                    <span class="section-label" style="border:none; padding:0; color:var(--green);">Last Result</span>
+                    <div style="font-size:12px; margin-top:5px;">XAUUSD: TP1 HIT (+1.5RR)</div>
+                </div>
             </div>
 
             <div id="paywall" class="paywall-overlay">
-                <h3 style="margin: 0; font-size: 16px;">Unlock Execution</h3>
-                <p style="font-size: 11px; color: #777; margin-top: 10px;">Stop guessing the entry. Trade with exact institutional parameters.</p>
-                
+                <h2 style="color:var(--gold); font-size: 18px; margin-bottom: 10px;">UNLOCK EXECUTION</h2>
+                <p style="font-size: 11px; color: #aaa; margin-bottom: 25px;">You see the direction. Join the elite flow to get exact entries and confirmation logic.</p>
                 <a href="https://leumas-institutional.lemonsqueezy.com/checkout/buy/eb356f78-8db1-45b9-8aed-6b857cdebef0?embed=1" 
                    class="lemonsqueezy-button btn-upgrade">
                     UPGRADE — $10/MONTH
@@ -83,26 +101,50 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
+        // 1. Admin/Premium Check
         window.onload = function() {
-            // Admin bypass logic
             if (localStorage.getItem("isPremium") === "true") {
                 document.getElementById('paywall').style.display = 'none';
-                document.getElementById('execution-panel').classList.remove('blurred');
             }
+            fetchNews();
         };
 
+        // 2. Marketaux News Integration
+        async function fetchNews() {
+            const api_key = "2lS7kF093swmLHcuAbKy4uhyUpPWtL2DDsZeDWkk";
+            const url = `https://api.marketaux.com/v1/news/all?symbols=XAUUSD,TSLA,AMZN&filter_entities=true&language=en&api_token=${api_key}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const feed = document.getElementById('news-feed');
+                feed.innerHTML = data.data.slice(0, 5).map(item => `
+                    <div class="news-item">
+                        <b style="color:var(--gold)">${item.source}</b>: ${item.title}
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('news-feed').innerText = "Real-time news unavailable.";
+            }
+        }
+
+        // 3. TradingView Widget
         new TradingView.widget({
-            "autosize": true,
-            "symbol": "OANDA:XAUUSD",
-            "interval": "15",
-            "theme": "dark",
-            "container_id": "tv_chart",
-            "hide_top_toolbar": true,
-            "hide_legend": true
+            "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "15", "theme": "dark",
+            "container_id": "tv_chart", "hide_top_toolbar": true, "hide_legend": true
         });
+
+        // 4. Precision Mode Toggle
+        let precisionOn = true;
+        document.getElementById('precision-toggle').onclick = function() {
+            precisionOn = !precisionOn;
+            this.innerText = `PRECISION MODE: ${precisionOn ? 'ON' : 'OFF'}`;
+            this.style.color = precisionOn ? 'var(--green)' : 'var(--red)';
+            document.getElementById('premium-content').style.opacity = precisionOn ? '1' : '0.1';
+        };
     </script>
 </body>
 </html>
+
 
 
 
