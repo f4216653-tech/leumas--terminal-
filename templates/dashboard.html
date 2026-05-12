@@ -3,43 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Institutional | Dashboard</title>
+    <title>Leumas Terminal | Institutional Flow</title>
     <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
     <style>
-        :root { --bg: #050505; --panel: #0c0c0c; --border: #1a1a1a; --gold: #d4af37; --green: #00ff88; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 280px; border-right: 1px solid var(--border); background: var(--panel); }
-        .main { flex: 1; position: relative; }
-        .paywall { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .btn-gold { display: block; padding: 15px; background: var(--gold); color: black; text-decoration: none; font-weight: bold; border-radius: 2px; text-align: center; }
+        :root { --bg: #050505; --panel: #0a0a0a; --border: #1a1a1a; --gold: #d4af37; --green: #00ff88; --red: #ff4d4d; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        .top-bar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--panel); font-size: 11px; font-weight: bold; }
+        .status-tag { color: var(--gold); padding: 4px 8px; border: 1px solid var(--gold); border-radius: 2px; }
+
+        .content-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* LEFT: WATCHLIST (FRONT) */
+        .sidebar-left { width: 280px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
+        .watchlist-item { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .asset-name { font-weight: 800; font-size: 12px; }
+        .asset-price { font-size: 11px; font-family: monospace; color: #888; }
+
+        /* CENTER: CHART */
+        .chart-container { flex: 1; background: #000; border-right: 1px solid var(--border); position: relative; }
+
+        /* RIGHT: PREMIUM */
+        .sidebar-right { width: 300px; padding: 25px; background: var(--panel); position: relative; }
+        .blurred { filter: blur(12px); opacity: 0.15; pointer-events: none; transition: 0.3s; }
+        
+        .paywall-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(0,0,0,0.7); padding: 25px; box-sizing: border-box; z-index: 10; }
+        .btn-upgrade { display: block; width: 100%; padding: 16px; background: var(--gold); color: #000; text-decoration: none; font-weight: 800; border-radius: 2px; margin-top: 20px; font-size: 12px; text-transform: uppercase; }
+
+        .label { font-size: 9px; color: #444; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .value { font-size: 13px; font-weight: 700; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div style="padding: 20px; border-bottom: 1px solid var(--border); color: var(--gold); font-weight: 800; font-size: 12px;">INTEL FEED</div>
-        <div style="padding: 20px;">
-            <div style="font-size: 10px; color: #444; margin-bottom: 5px;">BIAS: BULLISH</div>
-            <div style="color: var(--green); font-size: 14px; font-weight: bold;">XAUUSD TARGET: 2325.00</div>
-        </div>
+
+    <div class="top-bar">
+        <div>TERMINAL: <span style="color:var(--gold)">LEUMAS INSTITUTIONAL</span></div>
+        <div>SESSION: <span style="color:var(--green)">LONDON / NY</span></div>
+        <div class="status-tag">PRECISION MODE</div>
     </div>
 
-    <div class="main">
-        <div id="paywall" class="paywall">
-            <div style="border: 1px solid var(--gold); padding: 40px; background: #000; text-align: center; max-width: 320px;">
-                <h3 style="margin: 0 0 15px 0;">Premium Access Locked</h3>
-                <p style="font-size: 12px; color: #666; margin-bottom: 25px;">Institutional levels, entries, and risk management are reserved for Elite members.</p>
-                <a href="https://leumas-institutional.lemonsqueezy.com/checkout/buy/eb356f78-8db1-45b9-8aed-6b857cdebef0?embed=1" class="lemonsqueezy-button btn-gold">UPGRADE FOR $10</a>
+    <div class="content-body">
+        <div class="sidebar-left">
+            <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 9px; color: #555; letter-spacing: 2px;">WATCHLIST</div>
+            <div class="watchlist-item"><span class="asset-name">XAUUSD</span><span class="asset-price" style="color:var(--green)">2314.50</span></div>
+            <div class="watchlist-item"><span class="asset-name">BTCUSD</span><span class="asset-price" style="color:var(--red)">64,120</span></div>
+            <div class="watchlist-item"><span class="asset-name">DXY</span><span class="asset-price">104.22</span></div>
+
+            <div style="padding: 20px; margin-top: auto; border-top: 1px solid var(--border);">
+                <div class="label">Directional Bias</div>
+                <div class="value" style="color:var(--green)">BULLISH > 2310.00</div>
+                <div class="label">Institutional Logic</div>
+                <p style="font-size: 11px; color: #666; line-height: 1.6;">Asian range sweep confirmed. Institutional displacement on 15m. Waiting for FVG re-entry.</p>
             </div>
         </div>
-        <div id="chart" style="width: 100%; height: 100%;"></div>
+
+        <div class="chart-container" id="tv_chart"></div>
+
+        <div class="sidebar-right">
+            <div id="execution-panel" class="blurred">
+                <div class="label">Execution Entry</div>
+                <div class="value">2311.80 — 2312.50</div>
+                <div class="label">Risk Parameter (SL)</div>
+                <div class="value" style="color:var(--red)">2308.10</div>
+                <div class="label">Take Profit Targets</div>
+                <div class="value" style="color:var(--green)">2318.00 / 2325.00</div>
+            </div>
+
+            <div id="paywall" class="paywall-overlay">
+                <h3 style="margin: 0; font-size: 16px;">Unlock Execution</h3>
+                <p style="font-size: 11px; color: #777; margin-top: 10px;">Stop guessing the entry. Trade with exact institutional parameters.</p>
+                
+                <a href="https://leumas-institutional.lemonsqueezy.com/checkout/buy/eb356f78-8db1-45b9-8aed-6b857cdebef0?embed=1" 
+                   class="lemonsqueezy-button btn-upgrade">
+                    UPGRADE — $10/MONTH
+                </a>
+            </div>
+        </div>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         window.onload = function() {
-            // Admin bypass check
+            // Admin bypass logic
             if (localStorage.getItem("isPremium") === "true") {
                 document.getElementById('paywall').style.display = 'none';
+                document.getElementById('execution-panel').classList.remove('blurred');
             }
         };
 
@@ -48,11 +96,14 @@
             "symbol": "OANDA:XAUUSD",
             "interval": "15",
             "theme": "dark",
-            "container_id": "chart"
+            "container_id": "tv_chart",
+            "hide_top_toolbar": true,
+            "hide_legend": true
         });
     </script>
 </body>
 </html>
+
 
 
 
