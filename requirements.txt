@@ -1,8 +1,7 @@
-Flask
-Flask-SQLAlchemy
-Flask-Login
-firebase-admin
+flask
+requests
 gunicorn
+
 
 
 
