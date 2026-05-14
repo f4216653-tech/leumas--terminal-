@@ -71,5 +71,7 @@ def webhook():
     return "Verification Failed", 401
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # The '0.0.0.0' host is required for Render to "see" the app
+    app.run(host='0.0.0.0', port=5000)
+    
 
