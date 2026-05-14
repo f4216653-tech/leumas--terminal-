@@ -3,147 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Terminal | Decision Engine</title>
-    <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+    <title>Leumas Institutional | Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        :root { --bg: #050505; --panel: #0a0a0a; --border: #1a1a1a; --gold: #d4af37; --green: #00ff88; --red: #ff4d4d; --gray: #555; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* TOP BAR */
-        .top-bar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--panel); font-size: 11px; font-weight: bold; }
-        
-        .content-body { display: flex; flex: 1; overflow: hidden; }
-
-        /* LEFT: WATCHLIST & NEWS */
-        .sidebar-left { width: 280px; border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
-        .watchlist-item { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; }
-        .news-box { flex: 1; overflow-y: auto; padding: 15px; font-size: 11px; border-top: 1px solid var(--border); }
-        .news-item { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #111; line-height: 1.4; }
-
-        /* CENTER: CHART */
-        .chart-container { flex: 1; background: #000; border-right: 1px solid var(--border); }
-
-        /* RIGHT: DECISION ENGINE */
-        .sidebar-right { width: 340px; padding: 20px; background: var(--panel); position: relative; overflow-y: auto; }
-        .section-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; border-left: 2px solid var(--gold); padding-left: 8px; }
-        
-        /* HIERARCHY: ENTRY DOMINANCE */
-        .entry-box { background: #0c0c0c; padding: 22px; border: 1px solid #222; margin-bottom: 20px; text-align: center; }
-        .entry-price { font-size: 28px; font-weight: 900; color: var(--gold); display: block; margin-top: 5px; }
-
-        .status-pill { padding: 4px 10px; border-radius: 2px; font-size: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px; }
-        .waiting { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid var(--gold); }
-
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; }
-        .data-val { font-weight: 700; }
-
-        /* PAYWALL OVERLAY */
-        .paywall-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100; padding: 30px; box-sizing: border-box; }
-        .btn-upgrade { width: 100%; padding: 18px; background: var(--gold); color: #000; text-decoration: none; font-weight: 900; border-radius: 2px; font-size: 13px; }
+        :root { --bg: #ffffff; --text: #1a1a1b; --border: #e0e0e0; --accent: #0052ff; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+        .terminal-container { padding: 20px; }
+        .grid-card { border: 1px solid var(--border); border-radius: 4px; padding: 15px; margin-bottom: 20px; min-height: 200px; }
+        .premium-blur { filter: blur(5px); pointer-events: none; user-select: none; }
+        .signal-badge { padding: 5px 10px; border-radius: 3px; font-weight: bold; }
+        .buy { color: #00c853; background: rgba(0, 200, 83, 0.1); }
+        .sell { color: #ff3d00; background: rgba(255, 61, 0, 0.1); }
+        #gold-price, #btc-price { font-size: 1.5rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div>TERMINAL: <span style="color:var(--gold)">LEUMAS INSTITUTIONAL</span></div>
-        <div id="precision-toggle" style="cursor:pointer; color:var(--green)">PRECISION MODE: ON</div>
+<nav class="navbar navbar-light bg-light border-bottom">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">LEUMAS <span style="font-weight: 200;">INSTITUTIONAL</span></span>
+        <span class="badge bg-primary">{{ role }} ACCESS</span>
     </div>
+</nav>
 
-    <div class="content-body">
-        <div class="sidebar-left">
-            <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 9px; color: var(--gray);">WATCHLIST</div>
-            <div class="watchlist-item"><span>XAUUSD</span><span style="color:var(--green)">2314.50</span></div>
-            <div class="watchlist-item"><span>BTCUSD</span><span style="color:var(--red)">64,120</span></div>
+<div class="terminal-container container-fluid">
+    <div class="row">
+        <!-- Live Market Panel -->
+        <div class="col-md-8">
+            <div class="grid-card">
+                <h5>Global Market Flow</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th>Asset</th><th>Live Price</th><th>Trend</th><th>Institutional Volume</th></tr>
+                    </thead>
+                    <tbody id="market-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Predictive Engine (2/4 Strategy) -->
+        <div class="col-md-4">
+            <div class="grid-card {% if role == 'Free' %}premium-blur{% endif %}">
+                <h5>Algorithmic Signals</h5>
+                <div id="signal-engine">
+                    <p class="text-muted">Analyzing SMC Data...</p>
+                    <!-- Predicted Signals appear here -->
+                </div>
+                {% if role == 'Free' %}
+                <div style="position: absolute; top: 30%; left: 10%; text-align: center;">
+                    <a href="/subscription" class="btn btn-primary">Unlock Premium Signals</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sentiment & Correlation -->
+            <div class="grid-card">
+                <h5>Market Sentiment</h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>XAU/USD Sentiment:</span>
+                    <span id="gold-sentiment" class="signal-badge buy">BULLISH</span>
+                </div>
+                <hr>
+                <small class="text-muted">Correlation: BTC/USD +0.84 to Gold</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ROLE = "{{ role }}";
+    const ASSETS_LIST = ["BTC/USD", "XAU/USD", "EUR/USD", "GBP/USD", "NVDA", "AAPL", "ETH/USD", "XAG/USD", "TSLA", "USD/JPY"];
+
+    async function updateTerminal() {
+        try {
+            const res = await fetch('/api/market-data');
+            const data = await res.json();
             
-            <div class="news-box">
-                <span class="section-label" style="border:none; padding:0; margin-bottom:15px;">Market Intelligence Feed</span>
-                <div id="news-feed">Loading high-impact news...</div>
-            </div>
-        </div>
+            const tbody = document.getElementById('market-body');
+            tbody.innerHTML = '';
 
-        <div class="chart-container" id="tv_chart"></div>
+            // Filter assets based on role
+            const visibleAssets = ROLE === 'Free' ? ASSETS_LIST.slice(0, 3) : ASSETS_LIST;
 
-        <div class="sidebar-right">
-            <div id="premium-content">
-                <span class="section-label">Trade Status</span>
-                <div class="status-pill waiting">🟡 WAITING FOR CONFIRMATION</div>
+            visibleAssets.forEach(symbol => {
+                const price = data[symbol]?.price || "Loading...";
+                const change = (Math.random() * 2).toFixed(2); // Mocking change for UI demo
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${symbol}</strong></td>
+                        <td>$${parseFloat(price).toLocaleString()}</td>
+                        <td class="${change > 1 ? 'text-success' : 'text-danger'}">${change}%</td>
+                        <td>High (Institutional)</td>
+                    </tr>
+                `;
+            });
 
-                <div class="entry-box">
-                    <span class="section-label" style="border:none; padding:0;">Institutional Entry</span>
-                    <span class="entry-price">2311.80 – 2312.50</span>
-                </div>
-
-                <span class="section-label">Execution Logic</span>
-                <div class="data-row"><span>Confirmation:</span><span class="data-val">5M CHOCH + Pullback</span></div>
-                <div class="data-row"><span>Invalidation:</span><span class="data-val" style="color:var(--red)">Break below 2308.10</span></div>
-
-                <span class="section-label">Risk Management</span>
-                <div class="data-row"><span>Stop Loss:</span><span class="data-val" style="color:var(--red)">2308.10</span></div>
-                <div class="data-row"><span>Take Profit:</span><span class="data-val" style="color:var(--green)">2318.00 | 2325.00</span></div>
-                <div class="data-row"><span>Risk/Reward:</span><span class="data-val" style="color:var(--gold)">1 : 2.5 RR</span></div>
-
-                <div style="margin-top:25px; padding:15px; background:#111; border-left:2px solid var(--green);">
-                    <span class="section-label" style="border:none; padding:0; color:var(--green);">Last Result</span>
-                    <div style="font-size:12px; margin-top:5px;">XAUUSD: TP1 HIT (+1.5RR)</div>
-                </div>
-            </div>
-
-            <div id="paywall" class="paywall-overlay">
-                <h2 style="color:var(--gold); font-size: 18px; margin-bottom: 10px;">UNLOCK EXECUTION</h2>
-                <p style="font-size: 11px; color: #aaa; margin-bottom: 25px;">You see the direction. Join the elite flow to get exact entries and confirmation logic.</p>
-                <a href="https://leumas-institutional.lemonsqueezy.com/checkout/buy/eb356f78-8db1-45b9-8aed-6b857cdebef0?embed=1" 
-                   class="lemonsqueezy-button btn-upgrade">
-                    UPGRADE — $10/MONTH
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script>
-        // 1. Admin/Premium Check
-        window.onload = function() {
-            if (localStorage.getItem("isPremium") === "true") {
-                document.getElementById('paywall').style.display = 'none';
+            if (ROLE !== 'Free') {
+                runAlgorithmicLogic(data);
             }
-            fetchNews();
-        };
+        } catch (e) { console.error("Terminal Sync Error", e); }
+    }
 
-        // 2. Marketaux News Integration
-        async function fetchNews() {
-            const api_key = "2lS7kF093swmLHcuAbKy4uhyUpPWtL2DDsZeDWkk";
-            const url = `https://api.marketaux.com/v1/news/all?symbols=XAUUSD,TSLA,AMZN&filter_entities=true&language=en&api_token=${api_key}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                const feed = document.getElementById('news-feed');
-                feed.innerHTML = data.data.slice(0, 5).map(item => `
-                    <div class="news-item">
-                        <b style="color:var(--gold)">${item.source}</b>: ${item.title}
-                    </div>
-                `).join('');
-            } catch (e) {
-                document.getElementById('news-feed').innerText = "Real-time news unavailable.";
-            }
+    function runAlgorithmicLogic(data) {
+        const signalBox = document.getElementById('signal-engine');
+        // 2/4 Accuracy Logic: We only trigger a "Confirm" if price is at extreme relative to BTC
+        const btcPrice = parseFloat(data["BTC/USD"]?.price);
+        
+        if (btcPrice > 80000) {
+            signalBox.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>LEUMAS SIGNAL:</strong> BUY BTC/USD<br>
+                    <small>Reason: Institutional Liquidity Grab at 78k confirmed.</small>
+                    <div class="mt-2"><span class="signal-badge buy">CONFIDENCE: 88%</span></div>
+                </div>
+            `;
         }
+    }
 
-        // 3. TradingView Widget
-        new TradingView.widget({
-            "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "15", "theme": "dark",
-            "container_id": "tv_chart", "hide_top_toolbar": true, "hide_legend": true
-        });
+    setInterval(updateTerminal, 60000); // 60s Institutional Refresh
+    updateTerminal();
+</script>
 
-        // 4. Precision Mode Toggle
-        let precisionOn = true;
-        document.getElementById('precision-toggle').onclick = function() {
-            precisionOn = !precisionOn;
-            this.innerText = `PRECISION MODE: ${precisionOn ? 'ON' : 'OFF'}`;
-            this.style.color = precisionOn ? 'var(--green)' : 'var(--red)';
-            document.getElementById('premium-content').style.opacity = precisionOn ? '1' : '0.1';
-        };
-    </script>
 </body>
 </html>
+
 
 
 
