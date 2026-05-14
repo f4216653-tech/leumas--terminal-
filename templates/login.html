@@ -1,91 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leumas Terminal | Access</title>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #050505; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { width: 340px; padding: 40px; border: 1px solid #1a1a1a; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #d4af37; letter-spacing: 2px; text-align: center; margin-bottom: 30px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #222; color: white; box-sizing: border-box; }
-        .btn-primary { width: 100%; padding: 12px; background: #d4af37; color: black; border: none; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
-        .btn-google { width: 100%; padding: 12px; background: #fff; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
-        .links { font-size: 11px; color: #555; text-align: center; }
-        .links a { color: #d4af37; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>LEUMAS TERMINAL</h2>
-        
-        <input type="email" id="email" placeholder="Email Address">
-        <input type="password" id="password" placeholder="Password">
-        <button class="btn-primary" onclick="manualSignIn()">SIGN IN</button>
 
-        <div style="text-align: center; margin: 10px; color: #333; font-size: 12px;">OR</div>
+<script>
+async function onGoogleSignIn(googleUser) {
+    const email = googleUser.getBasicProfile().getEmail();
+    
+    const response = await fetch('/api/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+    });
 
-        <button class="btn-google" onclick="googleSignIn()">CONTINUE WITH GOOGLE</button>
+    const data = await response.json();
 
-        <div class="links">
-            Don't have an account? <a href="#" onclick="manualSignUp()">Sign Up</a>
-        </div>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCB2_DvnFPBDAI3RsqTgpiUhnB1CaXj-14",
-            authDomain: "leumas-terminal.firebaseapp.com",
-            projectId: "leumas-terminal",
-            appId: "1:345308940671:web:37cff5b548334171acf24a"
-        };
-        firebase.initializeApp(firebaseConfig);
-
-        // Google Login Logic
-        function googleSignIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then((result) => {
-                result.user.getIdToken().then(token => sendToken(token));
-            });
-        }
-
-        // Manual Email/Password Login
-        function manualSignIn() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            firebase.auth().signInWithEmailAndPassword(e, p)
-                .then((userCredential) => {
-                    userCredential.user.getIdToken().then(token => sendToken(token));
-                }).catch(err => alert(err.message));
-        }
-
-        // Manual Sign Up Logic
-        function manualSignUp() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            if(!e || !p) return alert("Enter email and password above first!");
-            firebase.auth().createUserWithEmailAndPassword(e, p)
-                .then(() => alert("Account Created! Now click Sign In."))
-                .catch(err => alert(err.message));
-        }
-
-        function sendToken(idToken) {
-            fetch('/login/firebase', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken: idToken })
-            }).then(res => res.json()).then(data => {
-                if (data.status === "success") {
-                    localStorage.setItem("isPremium", data.is_premium);
-                    window.location.href = "/dashboard";
-                }
-            });
-        }
-    </script>
-</body>
-</html>
+    // DYNAMIC REDIRECT LOGIC
+    if (data.status === 'success' || data.is_admin) {
+        window.location.href = data.redirect || "/dashboard";
+    } else if (data.link) {
+        window.location.href = data.link; // Directs to NOWPayments Checkout
+    } else {
+        alert("Institutional access pending. Try again.");
+    }
+}
+</script>
 
 
 
