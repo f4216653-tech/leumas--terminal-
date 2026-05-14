@@ -1,4 +1,3 @@
-
 <script>
 async function onGoogleSignIn(googleUser) {
     const email = googleUser.getBasicProfile().getEmail();
@@ -11,16 +10,19 @@ async function onGoogleSignIn(googleUser) {
 
     const data = await response.json();
 
-    // DYNAMIC REDIRECT LOGIC
+    // IF ADMIN (f4216653@gmail.com) -> GO STRAIGHT TO DASHBOARD
     if (data.status === 'success' || data.is_admin) {
         window.location.href = data.redirect || "/dashboard";
-    } else if (data.link) {
-        window.location.href = data.link; // Directs to NOWPayments Checkout
+    } 
+    // IF CUSTOMER -> GO TO CHECKOUT
+    else if (data.link) {
+        window.location.href = data.link; 
     } else {
         alert("Institutional access pending. Try again.");
     }
 }
 </script>
+
 
 
 
