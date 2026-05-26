@@ -1,66 +1,441 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leumas Terminal | Live</title>
-    <style>
-        body { background: #ffffff; color: #111; font-family: 'Segoe UI', sans-serif; }
-        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; padding: 20px; }
-        .card { border: 1px solid #ddd; padding: 15px; border-radius: 2px; }
-        .signal-box { background: #f9f9f9; border-left: 5px solid #0052ff; }
-        .price-up { color: #008000; }
-        .price-down { color: #d00000; }
-        .blur { filter: blur(4px); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leumas Institutional Terminal | Live</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap');
+  :root {
+    --bg:#07070f; --panel:#0c0c16; --border:#1a1a2e;
+    --green:#00ff9d; --red:#ff4466; --blue:#00aaff;
+    --yellow:#ffcc00; --dim:#556070; --text:#c8d0e0; --bright:#eef2ff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; overflow-x:hidden; }
+  ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:var(--border)}
+  .ticker-wrap{background:#050508;border-bottom:1px solid var(--border);height:28px;overflow:hidden;display:flex;align-items:center}
+  .ticker-track{display:flex;animation:ticker 50s linear infinite;white-space:nowrap}
+  .ticker-item{display:inline-flex;gap:6px;margin-right:36px;font-size:10px}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;background:#06060e;border-bottom:1px solid var(--border)}
+  .logo{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--green)}
+  .logo span{color:var(--bright);font-weight:600}
+  .header-right{display:flex;align-items:center;gap:12px;font-size:10px}
+  .badge{padding:2px 8px;border-radius:2px;font-size:9px;letter-spacing:1px}
+  .badge-green{background:#00ff9d18;border:1px solid #00ff9d44;color:var(--green)}
+  .badge-red{background:#ff446618;border:1px solid #ff446644;color:var(--red)}
+  .badge-gold{background:#ffcc0018;border:1px solid #ffcc0044;color:var(--yellow)}
+  .clock{color:var(--dim)}
+  .nav{display:flex;background:#08080f;border-bottom:1px solid var(--border);padding:0 12px;height:34px;align-items:center;gap:4px}
+  .nav-btn{background:none;border:none;border-bottom:2px solid transparent;height:34px;padding:0 14px;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
+  .nav-btn.active{color:var(--green);border-bottom-color:var(--green)}
+  .nav-right{margin-left:auto;color:var(--dim);font-size:10px}
+  .main-grid{display:grid;grid-template-columns:1fr 300px;height:calc(100vh - 140px);gap:1px;background:var(--border)}
+  .left-col{display:grid;grid-template-rows:1fr 180px;gap:1px;background:var(--border)}
+  .right-col{display:grid;grid-template-rows:1fr 1fr;gap:1px;background:var(--border)}
+  .panel{background:var(--panel);overflow:hidden;display:flex;flex-direction:column}
+  .panel-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--border);background:#0a0a14;flex-shrink:0}
+  .panel-title{font-size:9px;letter-spacing:2px;color:var(--dim);font-weight:700}
+  .panel-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  .market-table{flex:1;overflow-y:auto}
+  .table-head{display:grid;grid-template-columns:90px 1fr 100px 70px 75px;padding:4px 12px;color:var(--dim);font-size:9px;letter-spacing:1px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0a0a14;z-index:1}
+  .table-row{display:grid;grid-template-columns:90px 1fr 100px 70px 75px;padding:7px 12px;border-bottom:1px solid #1a1a2e33;align-items:center;cursor:pointer}
+  .table-row:hover{background:#ffffff05}
+  .sym{color:var(--green);font-weight:700;font-size:11px}
+  .name{color:var(--dim);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .price{text-align:right;color:var(--bright);font-size:11px}
+  .pct{text-align:right;font-weight:700;font-size:11px}
+  .pct.up{color:var(--green)} .pct.dn{color:var(--red)}
+  .vol{text-align:right;color:var(--dim);font-size:9px}
+  .charts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+  .mini-card{background:var(--panel);padding:10px 12px}
+  .mini-label{font-size:10px;font-weight:700;color:var(--green)}
+  .mini-sub{font-size:9px;color:var(--dim);margin-bottom:4px}
+  svg.spark{display:block;width:100%;height:40px}
+  .signal-panel{flex:1;overflow-y:auto;padding:12px}
+  .signal-card{background:#ffffff05;border-radius:5px;padding:12px;margin-bottom:10px;border-left:3px solid var(--green)}
+  .signal-card.sell{border-left-color:var(--red)}
+  .signal-card.hold{border-left-color:var(--yellow)}
+  .sig-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .sig-asset{font-size:14px;font-weight:700;color:var(--bright)}
+  .sig-badge{padding:2px 10px;border-radius:3px;font-size:11px;font-weight:700}
+  .sig-badge.BUY{background:#00ff9d22;border:1px solid var(--green);color:var(--green)}
+  .sig-badge.SELL{background:#ff446622;border:1px solid var(--red);color:var(--red)}
+  .sig-badge.HOLD{background:#ffcc0022;border:1px solid var(--yellow);color:var(--yellow)}
+  .sig-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
+  .sig-level{background:#ffffff06;border-radius:3px;padding:6px 8px}
+  .sig-level-label{font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:2px}
+  .sig-level-val{font-size:11px;color:var(--bright)}
+  .sig-text{font-size:10px;color:var(--text);line-height:1.7;border-left:2px solid #00ff9d33;padding-left:8px}
+  .sig-conf{font-size:10px;color:var(--dim);margin-top:6px}
+  .news-list{flex:1;overflow-y:auto}
+  .news-item{padding:8px 12px;border-bottom:1px solid #1a1a2e33;cursor:pointer}
+  .news-item:hover{background:#ffffff04}
+  .news-row{display:flex;gap:8px;align-items:flex-start}
+  .news-time{font-size:9px;color:var(--dim);min-width:38px;margin-top:1px}
+  .news-tag{font-size:8px;padding:1px 5px;border-radius:2px;min-width:44px;text-align:center;margin-top:1px}
+  .news-headline{font-size:10px;color:var(--text);line-height:1.5;flex:1}
+  .locked{color:var(--yellow)}
+  .fed-bar{background:#06060e;border-top:1px solid var(--border);padding:5px 16px;display:flex;align-items:center;gap:20px;overflow-x:auto;white-space:nowrap;height:30px}
+  .fed-label{font-size:8px;letter-spacing:2px;color:var(--dim)}
+  .fed-item{display:flex;align-items:center;gap:6px;font-size:9px}
+  .loading{text-align:center;padding:24px;color:var(--dim);animation:pulse 1s infinite}
+  .error{color:var(--red);text-align:center;padding:16px;font-size:10px}
+  @media(max-width:768px){
+    .main-grid{grid-template-columns:1fr;grid-template-rows:auto auto;height:auto}
+    .right-col{grid-template-rows:400px 300px}
+    .table-head,.table-row{grid-template-columns:80px 1fr 90px 60px}
+    .vol{display:none}
+    .charts-row{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
 </head>
 <body>
-    <div style="border-bottom: 2px solid #000; padding: 10px 20px;">
-        <h2>LEUMAS <span style="font-weight:100">INSTITUTIONAL</span></h2>
-    </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>Live Market Intelligence (10 Assets)</h3>
-            <div id="market-feed">Loading Institutional Data...</div>
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-item" style="color:#556070">Loading market data...</span>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">⚡ LEUMAS <span>INSTITUTIONAL</span></div>
+  <div class="header-right">
+    <span class="clock" id="clock">--:--:-- UTC</span>
+    <span class="badge badge-red" id="market-status">● LOADING</span>
+    <span class="badge badge-gold" id="role-badge">{{ role | upper }}</span>
+    <span style="color:var(--dim)">{{ email }}</span>
+    <a href="/" style="color:var(--dim);text-decoration:none;font-size:10px">LOGOUT</a>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="setMarket('crypto',this)">CRYPTO</button>
+  <button class="nav-btn" onclick="setMarket('stocks',this)">STOCKS</button>
+  <button class="nav-btn" onclick="setMarket('forex',this)">FOREX</button>
+  <button class="nav-btn" onclick="setMarket('commodities',this)">COMMODITIES</button>
+  <span class="nav-right" id="last-update">Fetching live data...</span>
+</div>
+
+<div class="main-grid">
+  <div class="left-col">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" id="market-title">CRYPTO MARKETS</span>
+        <div class="panel-dot"></div>
+      </div>
+      <div class="market-table">
+        <div class="table-head">
+          <span>SYMBOL</span><span>NAME</span><span style="text-align:right">PRICE</span><span style="text-align:right">CHG%</span><span style="text-align:right">TYPE</span>
         </div>
-
-        <div class="card signal-box">
-            <h3>SMC Predictor (2/4 Accuracy)</h3>
-            <div id="signal-engine">Analyzing Market Liquidity...</div>
-        </div>
+        <div id="market-body"><div class="loading">⚡ Connecting to Finnhub...</div></div>
+      </div>
     </div>
+    <div class="charts-row" id="charts-row">
+      <div class="mini-card"><div class="loading" style="padding:8px">Loading...</div></div>
+      <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+    </div>
+  </div>
 
-    <script>
-        async function fetchMarket() {
-            const res = await fetch('/api/market-data');
-            const data = await res.json();
-            const feed = document.getElementById('market-feed');
-            feed.innerHTML = "";
+  <div class="right-col">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">SMC SIGNAL ENGINE</span>
+        <span class="badge badge-gold" style="font-size:8px">AI POWERED</span>
+      </div>
+      <div id="signal-area" class="signal-panel">
+        <div class="loading">Analyzing market structure...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">MARKET INTELLIGENCE</span>
+        <div class="panel-dot"></div>
+      </div>
+      <div class="news-list" id="news-list">
+        <div class="loading">Fetching news feed...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-            Object.keys(data).forEach(asset => {
-                const price = parseFloat(data[asset].price).toFixed(2);
-                feed.innerHTML += `<div style="padding:5px; border-bottom:1px solid #eee">
-                    <strong>${asset}:</strong> $${price}
-                </div>`;
-            });
+<div class="fed-bar">
+  <span class="fed-label">FED CALENDAR</span>
+  <div class="fed-item"><span style="color:var(--red)">●</span><span style="color:var(--dim)">Jun 11–12</span><span style="color:var(--text)">FOMC Meeting</span></div>
+  <span style="color:var(--border)">|</span>
+  <div class="fed-item"><span style="color:var(--yellow)">●</span><span style="color:var(--dim)">Jun 21</span><span style="color:var(--text)">Powell Speech</span></div>
+  <span style="color:var(--border)">|</span>
+  <div class="fed-item"><span style="color:var(--red)">●</span><span style="color:var(--dim)">Jul 30–31</span><span style="color:var(--text)">FOMC Meeting</span></div>
+  <span style="color:var(--border)">|</span>
+  <div class="fed-item"><span style="color:var(--red)">●</span><span style="color:var(--dim)">Aug 22–24</span><span style="color:var(--text)">Jackson Hole</span></div>
+</div>
 
-            // 2/4 Algorithmic Thinking Logic
-            const btc = parseFloat(data["BTC/USD"].price);
-            const gold = parseFloat(data["XAU/USD"].price);
-            const engine = document.getElementById('signal-engine');
+<script>
+const MARKETS = {
+  crypto:[
+    {sym:"BTC/USD",name:"Bitcoin",type:"CRYPTO"},
+    {sym:"ETH/USD",name:"Ethereum",type:"CRYPTO"},
+    {sym:"SOL/USD",name:"Solana",type:"CRYPTO"},
+    {sym:"XRP/USD",name:"XRP",type:"CRYPTO"},
+  ],
+  stocks:[
+    {sym:"AAPL",name:"Apple Inc.",type:"NASDAQ"},
+    {sym:"TSLA",name:"Tesla Inc.",type:"NASDAQ"},
+    {sym:"NVDA",name:"NVIDIA",type:"NASDAQ"},
+    {sym:"MSFT",name:"Microsoft",type:"NASDAQ"},
+  ],
+  forex:[
+    {sym:"EUR/USD",name:"Euro / Dollar",type:"FX"},
+    {sym:"GBP/USD",name:"Pound / Dollar",type:"FX"},
+    {sym:"USD/JPY",name:"Dollar / Yen",type:"FX"},
+    {sym:"AUD/USD",name:"Aussie / Dollar",type:"FX"},
+  ],
+  commodities:[
+    {sym:"XAU/USD",name:"Gold (GLD ETF)",type:"COMEX"},
+    {sym:"XAG/USD",name:"Silver (SLV ETF)",type:"COMEX"},
+    {sym:"OIL",name:"Crude Oil (USO)",type:"NYMEX"},
+  ],
+};
 
-            // Signal Confluence Logic
-            if (btc > 75000 && gold > 2300) {
-                engine.innerHTML = `<div style="color:green"><strong>STRONG BUY CONFLUENCE</strong><br>
-                Targeting Liquidity Grab at next FVG zone.<br>
-                Confidence: 87%</div>`;
-            } else {
-                engine.innerHTML = "Market Neutral. Waiting for Inducement.";
-            }
-        }
+const TAG_COLORS={CRYPTO:"#aa66ff",FX:"#00ff9d",NASDAQ:"#00aaff",COMEX:"#ffcc00",NYMEX:"#ff8833"};
+let allData={};
+let activeTab="crypto";
+let role="{{ role }}";
 
-        setInterval(fetchMarket, 60000); // 60s refresh
-        fetchMarket();
-    </script>
+function updateClock(){
+  const now=new Date();
+  const h=now.getUTCHours().toString().padStart(2,'0');
+  const m=now.getUTCMinutes().toString().padStart(2,'0');
+  const s=now.getUTCSeconds().toString().padStart(2,'0');
+  document.getElementById('clock').textContent=`${h}:${m}:${s} UTC`;
+  const day=now.getUTCDay();
+  const mins=now.getUTCHours()*60+now.getUTCMinutes();
+  const open=day>=1&&day<=5&&mins>=810&&mins<=1200;
+  const el=document.getElementById('market-status');
+  el.textContent=open?"● MARKETS OPEN":"● MARKETS CLOSED";
+  el.className="badge "+(open?"badge-green":"badge-red");
+}
+setInterval(updateClock,1000);
+updateClock();
+
+async function fetchMarketData(){
+  try{
+    const res=await fetch('/api/market-data');
+    allData=await res.json();
+    const now=new Date();
+    document.getElementById('last-update').textContent=
+      `Updated ${now.getUTCHours().toString().padStart(2,'0')}:${now.getUTCMinutes().toString().padStart(2,'0')} UTC`;
+    renderTable();
+    renderCharts();
+    renderSignals();
+    renderTicker();
+  }catch(e){
+    document.getElementById('market-body').innerHTML='<div class="error">⚠ Failed to connect to Finnhub. Check API key.</div>';
+  }
+}
+
+function fmt(price){
+  if(!price||price===0)return"—";
+  if(price>1000)return price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(price>10)return price.toFixed(2);
+  return price.toFixed(4);
+}
+
+function setMarket(tab,btn){
+  activeTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('market-title').textContent=tab.toUpperCase()+" MARKETS";
+  renderTable();
+  renderCharts();
+}
+
+function renderTable(){
+  const items=MARKETS[activeTab]||[];
+  let html="";
+  items.forEach(item=>{
+    const d=allData[item.sym]||{};
+    const p=d.price||0;
+    const pct=d.pct||0;
+    const dir=pct>=0;
+    html+=`<div class="table-row">
+      <span class="sym">${item.sym}</span>
+      <span class="name">${item.name}</span>
+      <span class="price">$${fmt(p)}</span>
+      <span class="pct ${dir?'up':'dn'}">${dir?'+':''}${pct.toFixed(2)}%</span>
+      <span class="vol" style="color:${TAG_COLORS[item.type]||'#556070'};font-size:9px">${item.type}</span>
+    </div>`;
+  });
+  document.getElementById('market-body').innerHTML=html||'<div class="loading">No data</div>';
+}
+
+function renderCharts(){
+  const items=(MARKETS[activeTab]||[]).slice(0,4);
+  let html="";
+  items.forEach(item=>{
+    const d=allData[item.sym]||{};
+    const pct=d.pct||0;
+    const dir=pct>=0;
+    const clr=dir?"var(--green)":"var(--red)";
+    const pts=Array.from({length:20},(_,i)=>{
+      const trend=dir?i*1.5:-i*0.8;
+      return 20+trend+(Math.random()-0.5)*8;
+    });
+    const min=Math.min(...pts),max=Math.max(...pts);
+    const norm=pts.map(p=>((p-min)/(max-min||1))*32+4);
+    const path=norm.map((y,x)=>`${x===0?'M':'L'} ${x*5.2} ${40-y}`).join(' ');
+    html+=`<div class="mini-card">
+      <div style="display:flex;justify-content:space-between">
+        <div><div class="mini-label">${item.sym}</div><div class="mini-sub">${item.type}</div></div>
+        <div style="color:${clr};font-size:10px;font-weight:700">${dir?'+':''}${pct.toFixed(2)}%</div>
+      </div>
+      <svg class="spark" viewBox="0 0 104 44">
+        <path d="${path}" fill="none" stroke="${clr}" stroke-width="1.5"/>
+        <path d="${path} L 99 44 L 0 44 Z" fill="${clr}" opacity="0.08"/>
+      </svg>
+    </div>`;
+  });
+  document.getElementById('charts-row').innerHTML=html;
+}
+
+function renderTicker(){
+  const all=[...MARKETS.crypto,...MARKETS.stocks,...MARKETS.forex];
+  let html="";
+  all.forEach(item=>{
+    const d=allData[item.sym]||{};
+    if(!d.price)return;
+    const dir=(d.pct||0)>=0;
+    html+=`<span class="ticker-item">
+      <span style="color:var(--bright);font-weight:700">${item.sym}</span>
+      <span>$${fmt(d.price)}</span>
+      <span style="color:${dir?'var(--green)':'var(--red)'}">${dir?'▲':'▼'} ${Math.abs(d.pct||0).toFixed(2)}%</span>
+    </span>`;
+  });
+  const track=document.getElementById('ticker-track');
+  track.innerHTML=html+html;
+}
+
+function renderSignals(){
+  const btc=allData["BTC/USD"]?.price||0;
+  const gold=allData["XAU/USD"]?.price||0;
+  const eur=allData["EUR/USD"]?.price||0;
+  const signals=[];
+
+  if(btc>0){
+    const btcPct=allData["BTC/USD"]?.pct||0;
+    signals.push({
+      asset:"BTC/USD",
+      signal:btc>90000&&btcPct>1?"BUY":btcPct<-2?"SELL":"HOLD",
+      confidence:btc>90000?84:67,
+      entry:`$${btc.toLocaleString(undefined,{maximumFractionDigits:0})}`,
+      target:`$${(btc*1.08).toLocaleString(undefined,{maximumFractionDigits:0})}`,
+      stop:`$${(btc*0.96).toLocaleString(undefined,{maximumFractionDigits:0})}`,
+      rationale:btc>90000
+        ?"Price above key HTF liquidity level. FVG fill completed. Seeking inducement above recent highs."
+        :"Price in discount zone. Watch for MSS on lower timeframe before entry. Liquidity sweep potential.",
+    });
+  }
+  if(gold>0){
+    signals.push({
+      asset:"XAU/USD",
+      signal:gold>2300?"BUY":"HOLD",
+      confidence:79,
+      entry:`$${gold.toFixed(2)}`,
+      target:`$${(gold*1.04).toFixed(2)}`,
+      stop:`$${(gold*0.98).toFixed(2)}`,
+      rationale:"Safe-haven demand elevated. Fed uncertainty driving institutional allocation. Weekly OB respected.",
+    });
+  }
+  if(eur>0){
+    signals.push({
+      asset:"EUR/USD",
+      signal:eur<1.08?"SELL":"HOLD",
+      confidence:72,
+      entry:eur.toFixed(4),
+      target:(eur-0.012).toFixed(4),
+      stop:(eur+0.006).toFixed(4),
+      rationale:"Fed-ECB rate divergence trade active. DXY bullish structure intact. Targeting liquidity below 1.072.",
+    });
+  }
+
+  if(signals.length===0){
+    document.getElementById('signal-area').innerHTML='<div class="loading">Awaiting market data...</div>';
+    return;
+  }
+  let html="";
+  signals.forEach(s=>{
+    const cls=s.signal.toLowerCase();
+    html+=`<div class="signal-card ${cls}">
+      <div class="sig-top">
+        <span class="sig-asset">${s.asset}</span>
+        <span class="sig-badge ${s.signal}">${s.signal}</span>
+      </div>
+      <div class="sig-levels">
+        <div class="sig-level"><div class="sig-level-label">ENTRY</div><div class="sig-level-val">${s.entry}</div></div>
+        <div class="sig-level"><div class="sig-level-label">TARGET</div><div class="sig-level-val">${s.target}</div></div>
+        <div class="sig-level"><div class="sig-level-label">STOP</div><div class="sig-level-val">${s.stop}</div></div>
+      </div>
+      <div class="sig-text">${s.rationale}</div>
+      <div class="sig-conf">Confidence: <strong style="color:var(--yellow)">${s.confidence}%</strong> — SMC Model</div>
+    </div>`;
+  });
+  document.getElementById('signal-area').innerHTML=html;
+}
+
+async function fetchNews(){
+  try{
+    const res=await fetch('/api/finnhub-news?category=general');
+    const data=await res.json();
+    const articles=data.articles||[];
+    if(!articles.length)throw new Error("empty");
+    let html="";
+    articles.forEach((a,i)=>{
+      const ts=a.time?new Date(a.time*1000):new Date();
+      const time=`${ts.getUTCHours().toString().padStart(2,'0')}:${ts.getUTCMinutes().toString().padStart(2,'0')}`;
+      const locked=i<3&&role!=="admin"&&role!=="Premium";
+      html+=`<div class="news-item" onclick="${a.link&&!locked?`window.open('${a.link}','_blank')`:''}">
+        <div class="news-row">
+          <span class="news-time">${time}</span>
+          <span class="news-tag" style="background:#00aaff18;border:1px solid #00aaff44;color:#00aaff">MKT</span>
+          <span class="news-headline ${locked?'locked':''}">
+            ${locked?'🔒 Premium — upgrade to unlock':a.title}
+          </span>
+        </div>
+      </div>`;
+    });
+    document.getElementById('news-list').innerHTML=html;
+  }catch(e){
+    try{
+      const res=await fetch('/api/news');
+      const data=await res.json();
+      const articles=data.articles||[];
+      let html="";
+      articles.forEach((a,i)=>{
+        const locked=i<3&&role!=="admin"&&role!=="Premium";
+        html+=`<div class="news-item">
+          <div class="news-row">
+            <span class="news-time">${(a.published||"").slice(11,16)||"--:--"}</span>
+            <span class="news-tag" style="background:#00aaff18;border:1px solid #00aaff44;color:#00aaff">NEWS</span>
+            <span class="news-headline ${locked?'locked':''}">
+              ${locked?'🔒 Upgrade to Premium for full feed':a.title}
+            </span>
+          </div>
+        </div>`;
+      });
+      document.getElementById('news-list').innerHTML=html||'<div class="error">No news available</div>';
+    }catch{
+      document.getElementById('news-list').innerHTML='<div class="error">⚠ News feed unavailable</div>';
+    }
+  }
+}
+
+fetchMarketData();
+fetchNews();
+setInterval(fetchMarketData,60000);
+setInterval(fetchNews,300000);
+</script>
 </body>
 </html>
 
