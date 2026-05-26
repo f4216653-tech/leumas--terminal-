@@ -1,27 +1,4 @@
-<script>
-async function onGoogleSignIn(googleUser) {
-    const email = googleUser.getBasicProfile().getEmail();
-    
-    const response = await fetch('/api/pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
-    });
 
-    const data = await response.json();
-
-    // IF ADMIN (f4216653@gmail.com) -> GO STRAIGHT TO DASHBOARD
-    if (data.status === 'success' || data.is_admin) {
-        window.location.href = data.redirect || "/dashboard";
-    } 
-    // IF CUSTOMER -> GO TO CHECKOUT
-    else if (data.link) {
-        window.location.href = data.link; 
-    } else {
-        alert("Institutional access pending. Try again.");
-    }
-}
-</script>
 
 
 
