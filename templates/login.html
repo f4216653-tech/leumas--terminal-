@@ -47,6 +47,7 @@
     font-size:12px; letter-spacing:1px; cursor:pointer; transition:all 0.2s;
   }
   .google-btn:hover { background:#ffffff12; border-color:#00ff9d44; }
+  .google-btn:disabled { opacity:0.5; cursor:not-allowed; }
   .google-icon { width:18px; height:18px; }
   .plans { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px; }
   .plan { border:1px solid #1a1a2e; border-radius:4px; padding:12px; text-align:center; }
@@ -60,7 +61,8 @@
   .feat-sub { font-size:9px; color:#556070; }
   .status-msg { text-align:center; margin-top:16px; font-size:11px; color:#556070; min-height:18px; }
   .status-msg.error { color:#ff4466; }
-  .status-msg.loading { color:#00ff9d; }
+  .status-msg.loading { color:#00ff9d; animation:pulse 1s infinite; }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
   .footer { margin-top:24px; text-align:center; font-size:9px; color:#2a2a3e; }
 </style>
 </head>
@@ -70,15 +72,7 @@
   <div class="logo">⚡ LEUMAS <span>INSTITUTIONAL</span></div>
   <div class="tagline">SMC ALGORITHMIC FLOW & INTELLIGENCE TERMINAL</div>
 
-  <div id="g_id_onload"
-       data-client_id="YOUR_GOOGLE_CLIENT_ID"
-       data-context="signin"
-       data-ux_mode="popup"
-       data-callback="onGoogleSignIn"
-       data-auto_prompt="false">
-  </div>
-
-  <button class="google-btn" onclick="triggerGoogleSignIn()">
+  <button class="google-btn" id="google-btn" onclick="signInWithGoogle()">
     <svg class="google-icon" viewBox="0 0 48 48">
       <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
       <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,19.091,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
@@ -121,49 +115,79 @@
 
 <div class="footer">LEUMAS INSTITUTIONAL © 2026 — INSTITUTIONAL GRADE INTELLIGENCE</div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
-function triggerGoogleSignIn(){
-  google.accounts.id.prompt();
-}
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-async function onGoogleSignIn(response){
-  const msg=document.getElementById('status-msg');
-  msg.className='status-msg loading';
-  msg.textContent='⚡ Authenticating...';
-  try{
-    const payload=JSON.parse(atob(response.credential.split('.')[1]));
-    const email=payload.email;
-    const res=await fetch('/api/pay',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email,credential:response.credential})
-    });
-    const data=await res.json();
-    if(data.status==='success'||data.is_admin){
-      msg.className='status-msg';
-      msg.style.color='#00ff9d';
-      msg.textContent='✓ Access granted. Loading terminal...';
-      setTimeout(()=>{window.location.href=data.redirect||"/dashboard";},800);
-    } else if(data.link){
-      msg.className='status-msg';
-      msg.style.color='#ffcc00';
-      msg.textContent='↗ Redirecting to payment...';
-      setTimeout(()=>{window.location.href=data.link;},600);
-    } else {
-      msg.className='status-msg error';
-      msg.textContent=data.error||'Access pending. Try again.';
+  const firebaseConfig = {
+    apiKey: "AIzaSyCB2_DvnFPBDAI3RsqTgpiUhnB1CaXj-14",
+    authDomain: "leumas-terminal.firebaseapp.com",
+    projectId: "leumas-terminal",
+    storageBucket: "leumas-terminal.firebasestorage.app",
+    messagingSenderId: "345308940671",
+    appId: "1:345308940671:web:37cff5b548334171acf24a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  window.signInWithGoogle = async function() {
+    const btn = document.getElementById('google-btn');
+    const msg = document.getElementById('status-msg');
+    btn.disabled = true;
+    msg.className = 'status-msg loading';
+    msg.textContent = '⚡ Authenticating...';
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const email = user.email;
+
+      localStorage.setItem('user_email', email);
+
+      msg.textContent = '✓ Signed in. Checking access...';
+
+      const res = await fetch('/api/pay', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email: email })
+      });
+
+      const data = await res.json();
+
+      if (data.status === 'success' || data.is_admin) {
+        msg.className = 'status-msg';
+        msg.style.color = '#00ff9d';
+        msg.textContent = '✓ Access granted. Loading terminal...';
+        setTimeout(() => { window.location.href = data.redirect || '/dashboard'; }, 800);
+      } else if (data.invoice_url || data.link) {
+        msg.className = 'status-msg';
+        msg.style.color = '#ffcc00';
+        msg.textContent = '↗ Redirecting to payment...';
+        setTimeout(() => { window.location.href = data.invoice_url || data.link; }, 600);
+      } else {
+        msg.className = 'status-msg error';
+        msg.textContent = data.error || '⚠ Access pending. Try again.';
+        btn.disabled = false;
+      }
+
+    } catch(e) {
+      msg.className = 'status-msg error';
+      if (e.code === 'auth/popup-blocked') {
+        msg.textContent = '⚠ Popup blocked. Allow popups and retry.';
+      } else if (e.code === 'auth/cancelled-popup-request') {
+        msg.textContent = '⚠ Sign in cancelled. Try again.';
+      } else {
+        msg.textContent = '⚠ ' + (e.message || 'Connection error. Retry.');
+      }
+      btn.disabled = false;
     }
-  }catch(e){
-    msg.className='status-msg error';
-    msg.textContent='⚠ Connection error. Please retry.';
   }
-}
 </script>
 
 </body>
 </html>
-
-
 
 
