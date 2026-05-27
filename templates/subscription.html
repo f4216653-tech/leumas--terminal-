@@ -1,17 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leumas Terminal | Premium Access</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding-top: 100px; }
-        .btn-pay { background: #6a0dad; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leumas Terminal | Premium Access</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#07070f; color:#c8d0e0;
+    font-family:'IBM Plex Mono',monospace;
+    min-height:100vh; display:flex;
+    flex-direction:column; align-items:center;
+    justify-content:center; padding:24px;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(255,204,0,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,204,0,0.02) 1px, transparent 1px);
+    background-size:40px 40px; pointer-events:none;
+  }
+  .card {
+    background:#0c0c16; border:1px solid #ffcc0033;
+    border-radius:6px; padding:40px 36px;
+    width:100%; max-width:460px;
+    box-shadow:0 0 80px #ffcc000a; text-align:center;
+  }
+  .logo { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; color:#00ff9d; margin-bottom:4px; }
+  .logo span { color:#eef2ff; }
+  .tagline { font-size:9px; color:#556070; letter-spacing:2px; margin-bottom:28px; }
+  .price-box {
+    background:#ffcc0008; border:1px solid #ffcc0033;
+    border-radius:6px; padding:24px; margin-bottom:24px;
+  }
+  .price-label { font-size:10px; color:#ffcc00; letter-spacing:2px; margin-bottom:8px; }
+  .price-big { font-size:48px; font-weight:700; color:#ffcc00; line-height:1; }
+  .price-per { font-size:12px; color:#556070; margin-top:4px; }
+  .features { text-align:left; margin-bottom:28px; }
+  .feat-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #1a1a2e; }
+  .feat-icon { color:#00ff9d; font-size:14px; min-width:18px; }
+  .feat-text { font-size:11px; color:#c8d0e0; }
+  .feat-sub { font-size:9px; color:#556070; }
+  .btn-pay {
+    display:block; width:100%;
+    background:linear-gradient(135deg,#ffcc0022,#ffcc0044);
+    border:1px solid #ffcc00; border-radius:4px; padding:16px;
+    color:#ffcc00; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; font-weight:700; letter-spacing:2px;
+    text-decoration:none; cursor:pointer; transition:all 0.2s;
+  }
+  .btn-pay:hover { background:linear-gradient(135deg,#ffcc0033,#ffcc0055); }
+  .btn-free {
+    display:block; width:100%; margin-top:12px;
+    background:none; border:1px solid #1a1a2e;
+    border-radius:4px; padding:12px; color:#556070;
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+    letter-spacing:1px; text-decoration:none; cursor:pointer; transition:all 0.2s;
+  }
+  .btn-free:hover { border-color:#556070; color:#c8d0e0; }
+  .status-msg { text-align:center; margin-top:16px; font-size:11px; min-height:18px; }
+  .secure { font-size:9px; color:#2a2a3e; margin-top:16px; }
+  .loading { color:#00ff9d; animation:pulse 1s infinite; }
+  .error { color:#ff4466; }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
 </head>
 <body>
-    <h1>Institutional Data Access Required</h1>
-    <p>Unlock SMC Algorithmic Flow and Intelligence.</p>
-    <br>
-    <a href="#" class="lemonsqueezy-button btn-pay">Unlock Premium Terminal</a>
-    <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+
+<div class="card">
+  <div class="logo">⚡ LEUMAS <span>INSTITUTIONAL</span></div>
+  <div class="tagline">UNLOCK INSTITUTIONAL INTELLIGENCE</div>
+
+  <div class="price-box">
+    <div class="price-label">PREMIUM TERMINAL</div>
+    <div class="price-big">$20</div>
+    <div class="price-per">per month — cancel anytime</div>
+  </div>
+
+  <div class="features">
+    <div class="feat-item">
+      <span class="feat-icon">⚡</span>
+      <div>
+        <div class="feat-text">SMC AI Signal Engine</div>
+        <div class="feat-sub">Liquidity · FVG · Order Block analysis across all assets</div>
+      </div>
+    </div>
+    <div class="feat-item">
+      <span class="feat-icon">📊</span>
+      <div>
+        <div class="feat-text">All Markets Unlocked</div>
+        <div class="feat-sub">Crypto · Stocks · Forex · Commodities — live data</div>
+      </div>
+    </div>
+    <div class="feat-item">
+      <span class="feat-icon">📰</span>
+      <div>
+        <div class="feat-text">Full Intelligence News Feed</div>
+        <div class="feat-sub">Finnhub + Newsdata — real-time macro & market news</div>
+      </div>
+    </div>
+    <div class="feat-item">
+      <span class="feat-icon">🏛</span>
+      <div>
+        <div class="feat-text">Fed & Macro Alerts</div>
+        <div class="feat-sub">FOMC · Powell · CPI · NFP event tracking</div>
+      </div>
+    </div>
+    <div class="feat-item">
+      <span class="feat-icon">🔄</span>
+      <div>
+        <div class="feat-text">60-Second Live Refresh</div>
+        <div class="feat-sub">Prices update automatically every minute</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-pay" onclick="startPayment()">UNLOCK PREMIUM TERMINAL →</button>
+  <a href="/dashboard" class="btn-free">Continue with free tier</a>
+
+  <div class="status-msg" id="status-msg"></div>
+  <div class="secure">🔒 Secured by NOWPayments · Crypto payments accepted · Cancel anytime</div>
+</div>
+
+<script>
+async function startPayment(){
+  const msg = document.getElementById('status-msg');
+  msg.className = 'status-msg loading';
+  msg.textContent = '⚡ Creating payment link...';
+
+  try {
+    const res = await fetch('/api/pay', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: localStorage.getItem('user_email') || ''})
+    });
+    const data = await res.json();
+
+    if (data.status === 'success' || data.is_admin) {
+      msg.style.color = '#00ff9d';
+      msg.textContent = '✓ Access granted. Loading terminal...';
+      setTimeout(() => { window.location.href = '/dashboard'; }, 800);
+    } else if (data.invoice_url) {
+      msg.style.color = '#ffcc00';
+      msg.textContent = '↗ Redirecting to NOWPayments...';
+      setTimeout(() => { window.location.href = data.invoice_url; }, 600);
+    } else if (data.link) {
+      msg.style.color = '#ffcc00';
+      msg.textContent = '↗ Redirecting to payment...';
+      setTimeout(() => { window.location.href = data.link; }, 600);
+    } else {
+      msg.className = 'status-msg error';
+      msg.textContent = '⚠ ' + (data.error || 'Payment error. Try again.');
+    }
+  } catch(e) {
+    msg.className = 'status-msg error';
+    msg.textContent = '⚠ Connection error. Please retry.';
+  }
+}
+</script>
+
 </body>
 </html>
