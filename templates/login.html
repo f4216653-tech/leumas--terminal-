@@ -1,4 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leumas Institutional Terminal | Login</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Grotesk:wght@600;700&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#07070f; color:#c8d0e0;
+    font-family:'IBM Plex Mono',monospace;
+    min-height:100vh; display:flex;
+    flex-direction:column; align-items:center;
+    justify-content:center; padding:24px;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,157,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,157,0.03) 1px, transparent 1px);
+    background-size:40px 40px; pointer-events:none;
+  }
+  .card {
+    background:#0c0c16; border:1px solid #1a1a2e;
+    border-radius:6px; padding:40px 36px;
+    width:100%; max-width:420px;
+    position:relative; box-shadow:0 0 80px #00ff9d0a;
+  }
+  .logo {
+    font-family:'Space Grotesk',sans-serif;
+    font-size:22px; font-weight:700;
+    color:#00ff9d; text-align:center; margin-bottom:4px;
+  }
+  .logo span { color:#eef2ff; }
+  .tagline {
+    text-align:center; font-size:10px;
+    color:#556070; letter-spacing:2px; margin-bottom:32px;
+  }
+  .divider { border:none; border-top:1px solid #1a1a2e; margin:24px 0; }
+  .google-btn {
+    display:flex; align-items:center; justify-content:center;
+    gap:12px; width:100%; background:#ffffff08;
+    border:1px solid #1a1a2e; border-radius:4px;
+    padding:14px; color:#eef2ff;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px; letter-spacing:1px; cursor:pointer; transition:all 0.2s;
+  }
+  .google-btn:hover { background:#ffffff12; border-color:#00ff9d44; }
+  .google-icon { width:18px; height:18px; }
+  .plans { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px; }
+  .plan { border:1px solid #1a1a2e; border-radius:4px; padding:12px; text-align:center; }
+  .plan.premium { border-color:#ffcc0044; }
+  .plan-name { font-size:10px; font-weight:700; margin-bottom:4px; }
+  .plan-price { font-size:18px; font-weight:700; color:#eef2ff; margin-bottom:8px; }
+  .plan-feat { font-size:9px; color:#556070; margin-bottom:3px; }
+  .features { margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .feat { background:#ffffff04; border:1px solid #1a1a2e; border-radius:4px; padding:10px 12px; }
+  .feat-title { font-size:9px; color:#00ff9d; letter-spacing:1px; margin-bottom:3px; }
+  .feat-sub { font-size:9px; color:#556070; }
+  .status-msg { text-align:center; margin-top:16px; font-size:11px; color:#556070; min-height:18px; }
+  .status-msg.error { color:#ff4466; }
+  .status-msg.loading { color:#00ff9d; }
+  .footer { margin-top:24px; text-align:center; font-size:9px; color:#2a2a3e; }
+</style>
+</head>
+<body>
 
+<div class="card">
+  <div class="logo">⚡ LEUMAS <span>INSTITUTIONAL</span></div>
+  <div class="tagline">SMC ALGORITHMIC FLOW & INTELLIGENCE TERMINAL</div>
+
+  <div id="g_id_onload"
+       data-client_id="YOUR_GOOGLE_CLIENT_ID"
+       data-context="signin"
+       data-ux_mode="popup"
+       data-callback="onGoogleSignIn"
+       data-auto_prompt="false">
+  </div>
+
+  <button class="google-btn" onclick="triggerGoogleSignIn()">
+    <svg class="google-icon" viewBox="0 0 48 48">
+      <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+      <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,19.091,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+      <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+      <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.022,35.228,44,30,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+    </svg>
+    SIGN IN WITH GOOGLE
+  </button>
+
+  <div class="status-msg" id="status-msg"></div>
+
+  <hr class="divider">
+
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name" style="color:#00ff9d">FREE</div>
+      <div class="plan-price">$0<span style="font-size:12px;color:#556070">/mo</span></div>
+      <div class="plan-feat">✓ Live prices</div>
+      <div class="plan-feat">✓ Basic news</div>
+      <div class="plan-feat" style="color:#2a2a3e">✗ AI signals</div>
+      <div class="plan-feat" style="color:#2a2a3e">✗ Full news feed</div>
+    </div>
+    <div class="plan premium">
+      <div class="plan-name" style="color:#ffcc00">PREMIUM</div>
+      <div class="plan-price" style="color:#ffcc00">$20<span style="font-size:12px;color:#556070">/mo</span></div>
+      <div class="plan-feat">✓ SMC AI signals</div>
+      <div class="plan-feat">✓ All markets</div>
+      <div class="plan-feat">✓ Full news feed</div>
+      <div class="plan-feat">✓ Fed alerts</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat"><div class="feat-title">MULTI-ASSET</div><div class="feat-sub">Crypto · Stocks · Forex · Commodities</div></div>
+    <div class="feat"><div class="feat-title">SMC ENGINE</div><div class="feat-sub">Liquidity · FVG · OB Analysis</div></div>
+    <div class="feat"><div class="feat-title">LIVE DATA</div><div class="feat-sub">Finnhub real-time feed</div></div>
+    <div class="feat"><div class="feat-title">FED TRACKER</div><div class="feat-sub">FOMC · Powell · Macro</div></div>
+  </div>
+</div>
+
+<div class="footer">LEUMAS INSTITUTIONAL © 2026 — INSTITUTIONAL GRADE INTELLIGENCE</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+function triggerGoogleSignIn(){
+  google.accounts.id.prompt();
+}
+
+async function onGoogleSignIn(response){
+  const msg=document.getElementById('status-msg');
+  msg.className='status-msg loading';
+  msg.textContent='⚡ Authenticating...';
+  try{
+    const payload=JSON.parse(atob(response.credential.split('.')[1]));
+    const email=payload.email;
+    const res=await fetch('/api/pay',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,credential:response.credential})
+    });
+    const data=await res.json();
+    if(data.status==='success'||data.is_admin){
+      msg.className='status-msg';
+      msg.style.color='#00ff9d';
+      msg.textContent='✓ Access granted. Loading terminal...';
+      setTimeout(()=>{window.location.href=data.redirect||"/dashboard";},800);
+    } else if(data.link){
+      msg.className='status-msg';
+      msg.style.color='#ffcc00';
+      msg.textContent='↗ Redirecting to payment...';
+      setTimeout(()=>{window.location.href=data.link;},600);
+    } else {
+      msg.className='status-msg error';
+      msg.textContent=data.error||'Access pending. Try again.';
+    }
+  }catch(e){
+    msg.className='status-msg error';
+    msg.textContent='⚠ Connection error. Please retry.';
+  }
+}
+</script>
+
+</body>
+</html>
 
 
 
